@@ -3,6 +3,14 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
 android {
     namespace 'com.autoblog.ai'
     compileSdk 35
