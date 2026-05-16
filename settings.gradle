@@ -10,12 +10,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-        maven {
-            url "https://maven.google.com"
-        }
+        // تم إضافة مستودع JitPack كدعم إضافي للمكتبات الخارجية
+        maven { url 'https://jitpack.io' }
+        // تم الإبقاء على مستودع السناب شوتس إذا كانت هناك مكتبات تجريبية تعتمد عليها
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 }
 rootProject.name = "AutoBlogAI"
