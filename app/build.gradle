@@ -3,17 +3,6 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-repositories {
-    google()
-    mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots"
-    }
-    maven {
-        url "https://maven.google.com"
-    }
-}
-
 android {
     namespace 'com.autoblog.ai'
     compileSdk 35
@@ -44,18 +33,18 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose:2.7.7"
 
-    // Google APIs + OAuth 2.0 (تم استبعاد المكتبات المسببة للتضارب داخلياً)
-    implementation("com.google.apis:google-api-services-blogger:v3-rev20230601-2.0.0") {
+    // Google APIs + OAuth 2.0 (تم تعديل إصدار Blogger لإصدار رسمي متاح ومستقر)
+    implementation("com.google.apis:google-api-services-blogger:v3-rev20240112-2.0.0") {
         exclude group: 'com.google.guava', module: 'guava'
     }
-    implementation("com.google.api-client:google-api-client-android:2.4.0") {
+    implementation("com.google.api-client:google-api-client-android:2.2.0") {
         exclude group: 'com.google.guava', module: 'guava'
     }
-    implementation("com.google.oauth-client:google-oauth-client-jetty:1.36.0") {
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1") {
         exclude group: 'org.mortbay.jetty', module: 'servlet-api'
         exclude group: 'com.google.guava', module: 'guava'
     }
-    implementation "com.google.http-client:google-http-client-gson:1.44.1"
+    implementation "com.google.http-client:google-http-client-gson:1.43.3"
 
     // JSON & Network
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
@@ -73,7 +62,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
 }
 
-// استراتيجية صارمة لتوحيد الإصدارات المتضاربة
+// استراتيجية صارمة لتوحيد الإصدارات المتضاربة داخلياً
 configurations.all {
     resolutionStrategy {
         force 'androidx.annotation:annotation:1.8.0'
