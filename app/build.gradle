@@ -33,14 +33,12 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose:2.7.7"
 
-    // Google APIs + OAuth 2.0 (تم تغيير إصدار Blogger للإصدار القياسي المستقر المتاح دائماً)
-    implementation("com.google.apis:google-api-services-blogger:v3-rev20220322-1.32.1") {
+    // Google APIs + OAuth 2.0 (تم تحويل جلب مكتبة Blogger عبر Jitpack لضمان التحميل بنجاح)
+    implementation("com.github.google:google-api-java-client-services:v3-rev20220322-1.32.1") {
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'com.google.http-client', module: 'google-http-client'
     }
-    implementation("com.google.api-client:google-api-client-android:2.2.0") {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
+    implementation "com.google.api-client:google-api-client-android:2.2.0"
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1") {
         exclude group: 'org.mortbay.jetty', module: 'servlet-api'
         exclude group: 'com.google.guava', module: 'guava'
@@ -63,7 +61,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
 }
 
-// استراتيجية صارمة لمنع تعارض مكاتب الأندرويد الداخلية مع مكاتب جوجل القديمة
+// استراتيجية توحيد مكاتب الأندرويد الداخلية مع مكاتب جوجل لضمان استقرار البناء
 configurations.all {
     resolutionStrategy {
         force 'androidx.annotation:annotation:1.8.0'
