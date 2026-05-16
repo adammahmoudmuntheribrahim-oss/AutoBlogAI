@@ -32,6 +32,7 @@ fun SettingsScreen() {
     var refreshToken by remember { mutableStateOf(prefs.getBloggerRefreshToken()) }
     var blogId by remember { mutableStateOf(prefs.getBloggerBlogId()) }
     var pexelsKey by remember { mutableStateOf(prefs.getPexelsApiKey()) }
+    var rssFeedUrl by remember { mutableStateOf(prefs.getRssFeedUrl()) }
 
     var geminiTestResult by remember { mutableStateOf<Boolean?>(null) }
     var bloggerTestResult by remember { mutableStateOf<Boolean?>(null) }
@@ -174,6 +175,17 @@ fun SettingsScreen() {
             }
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ---------- RSS Feed URL ----------
+        OutlinedTextField(
+            value = rssFeedUrl,
+            onValueChange = { rssFeedUrl = it },
+            label = { Text("رابط خلاصة RSS") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
@@ -184,6 +196,7 @@ fun SettingsScreen() {
                 prefs.setBloggerRefreshToken(refreshToken)
                 prefs.setBloggerBlogId(blogId)
                 prefs.setPexelsApiKey(pexelsKey)
+                prefs.setRssFeedUrl(rssFeedUrl)
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -1,13 +1,38 @@
 package com.autoblog.ai.data.api
 
+import com.autoblog.ai.data.model.ArticleItem
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
+import java.util.concurrent.TimeUnit
+
 class RssRepository {
 
-    suspend fun fetchArticles(): List<String> {
-        // TODO: استبدال بجلب حقيقي من خلاصات RSS
-        return listOf(
-            "مقال عن الذكاء الاصطناعي",
-            "تطبيقات أندرويد الجديدة",
-            "أخبار العملات الرقمية"
-        )
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://example.com/") // Base URL is ignored for @Url, but required
+        .client(okHttpClient)
+        .addConverterFactory(SimpleXmlConverterFactory.create())
+        .build()
+
+    private val rssService = retrofit.create(RssService::class.java)
+
+    suspend fun fetchArticles(rssUrl: String): List<ArticleItem> {
+        return try {
+            val response = rssService.getRssFeed(rssUrl)
+            if (response.isSuccessful) {
+                response.body()?.channel?.articles ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 }

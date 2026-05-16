@@ -1,5 +1,6 @@
 package com.autoblog.ai.data.api
 
+import com.autoblog.ai.data.model.ArticleContent
 import com.autoblog.ai.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,12 +14,12 @@ class GeminiService(private val prefs: PreferencesManager) {
 
     private val client = OkHttpClient()
 
-    suspend fun rewriteArticle(content: String): String {
+    suspend fun rewriteArticle(content: String): ArticleContent {
         val apiKey = prefs.getGeminiApiKey()
         if (apiKey.isEmpty()) throw Exception("مفتاح Gemini غير موجود")
 
         val prompt = """
-            أعد كتابة المقال التالي بطريقة احترافية مع تحسين السيو، أضف عنواناً جذاباً وخاتمة قصيرة:
+            أعد كتابة المقال التالي بطريقة احترافية مع تحسين السيو. يجب أن تتضمن الاستجابة عنوانًا جذابًا في السطر الأول، يليه المحتوى المعاد صياغته. لا تقم بتضمين أي مقدمات أو خاتمات إضافية غير العنوان والمحتوى.
             
             $content
         """.trimIndent()
@@ -38,14 +39,20 @@ class GeminiService(private val prefs: PreferencesManager) {
 
         return withContext(Dispatchers.IO) {
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw IOException("فشل الاتصال بـ Gemini")
-                val body = response.body?.string() ?: throw IOException("استجابة فارغة")
+                if (!response.isSuccessful) throw IOException("فشل الاتصال بـ Gemini: ${response.message}")
+                val body = response.body?.string() ?: throw IOException("استجابة فارغة من Gemini")
                 val json = JSONObject(body)
                 val candidates = json.getJSONArray("candidates")
                 val firstCandidate = candidates.getJSONObject(0)
                 val contentJson = firstCandidate.getJSONObject("content")
                 val parts = contentJson.getJSONArray("parts")
-                parts.getJSONObject(0).getString("text")
+                val rewrittenText = parts.getJSONObject(0).getString("text")
+
+                val lines = rewrittenText.split("\n", limit = 2)
+                val title = lines.firstOrNull()?.trim() ?: ""
+                val rewrittenContent = if (lines.size > 1) lines[1].trim() else ""
+
+                ArticleContent(title, rewrittenContent)
             }
         }
     }

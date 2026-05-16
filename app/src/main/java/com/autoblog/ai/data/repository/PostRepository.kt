@@ -2,6 +2,7 @@ package com.autoblog.ai.data.repository
 
 import com.autoblog.ai.data.api.*
 import com.autoblog.ai.data.model.Article
+import com.autoblog.ai.data.model.ArticleItem
 import com.autoblog.ai.utils.LocalStorage
 import com.autoblog.ai.utils.PreferencesManager
 
@@ -18,17 +19,21 @@ class PostRepository(
     suspend fun fetchAndProcess() {
         if (!prefs.isAllKeysSet()) throw Exception("يجب إدخال جميع مفاتيح API أولاً")
 
-        val articles = rss.fetchArticles()
-        for (article in articles) {
-            if (localStorage.isDuplicate(article)) continue
+        val rssUrl = prefs.getRssFeedUrl()
+        if (rssUrl.isEmpty()) throw Exception("يجب إدخال رابط RSS أولاً")
 
-            val rewritten = gemini.rewriteArticle(article)
-            val imageUrl = imageAi.generateImage(article)
-            val tags = seo.generateTags(article)
+        val articlesFromRss = rss.fetchArticles(rssUrl)
+        for (articleItem in articlesFromRss) {
+            if (localStorage.isDuplicate(articleItem.link)) continue
+
+            val rewrittenContent = gemini.rewriteArticle(articleItem.description.ifEmpty { articleItem.title })
+            val imageUrl = imageAi.generateImage(rewrittenContent.title)
+            val tags = seo.generateTags(rewrittenContent.content)
 
             val newArticle = Article(
-                title = article,
-                content = rewritten,
+                title = rewrittenContent.title,
+                link = articleItem.link,
+                content = rewrittenContent.content,
                 imageUrl = imageUrl,
                 tags = tags,
                 published = false
@@ -36,7 +41,10 @@ class PostRepository(
             localStorage.addArticle(newArticle)
 
             // النشر في بلوجر
-            blogger.publishPost(article, rewritten)
+            val postId = blogger.publishPost(newArticle.title, newArticle.content)
+            if (postId != null) {
+                localStorage.updateArticlePublishedStatus(newArticle.copy(published = true))
+            }
         }
     }
 }

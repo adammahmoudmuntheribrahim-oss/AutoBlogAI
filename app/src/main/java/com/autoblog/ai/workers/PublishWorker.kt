@@ -13,6 +13,10 @@ class PublishWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
+    companion object {
+        const val WORK_NAME = "AutoBlogAI_PublishWorker"
+    }
+
     override suspend fun doWork(): Result {
         val prefs = PreferencesManager(applicationContext)
         if (!prefs.isAllKeysSet()) {
@@ -30,7 +34,7 @@ class PublishWorker(
             Result.success()
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.retry()
+            Result.failure()
         }
     }
 }

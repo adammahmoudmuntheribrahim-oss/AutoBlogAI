@@ -11,7 +11,7 @@ object Scheduler {
         ).build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "autoblog_worker",
+            PublishWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             request
         )

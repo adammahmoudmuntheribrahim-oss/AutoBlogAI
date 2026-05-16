@@ -39,8 +39,17 @@ class LocalStorage(private val context: Context) {
         saveArticles(current)
     }
 
-    suspend fun isDuplicate(title: String): Boolean {
-        return loadArticles().any { it.title == title }
+    suspend fun isDuplicate(articleLink: String): Boolean {
+        return loadArticles().any { it.link == articleLink }
+    }
+
+    suspend fun updateArticlePublishedStatus(updatedArticle: Article) {
+        val current = loadArticles().toMutableList()
+        val index = current.indexOfFirst { it.id == updatedArticle.id }
+        if (index != -1) {
+            current[index] = updatedArticle
+            saveArticles(current)
+        }
     }
 
     suspend fun clearAll() {

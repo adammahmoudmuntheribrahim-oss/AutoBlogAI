@@ -10,23 +10,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autoblog.ai.data.model.Article
 import com.autoblog.ai.utils.LocalStorage
 import com.autoblog.ai.utils.PreferencesManager
 import com.autoblog.ai.viewmodel.DashboardViewModel
 
 @Composable
-fun DashboardScreen(prefs: PreferencesManager) {
+fun DashboardScreen(prefs: PreferencesManager, dashboardViewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory)) {
     val context = LocalContext.current
     val localStorage = remember { LocalStorage(context) }
-    val viewModel = remember { DashboardViewModel() }
-    val posts by viewModel.posts.collectAsState()
+    val posts by dashboardViewModel.posts.collectAsState()
+    val isLoading by dashboardViewModel.isLoading.collectAsState()
+    val isSetupComplete by dashboardViewModel.isSetupComplete.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadPosts(localStorage)
+        dashboardViewModel.loadPosts(localStorage)
     }
-
-    val allKeysSet = prefs.isAllKeysSet()
 
     Column(
         modifier = Modifier
@@ -40,14 +40,14 @@ fun DashboardScreen(prefs: PreferencesManager) {
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        if (!allKeysSet) {
+        if (!isSetupComplete) {
             Spacer(modifier = Modifier.height(12.dp))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "⚠️ يجب إدخال جميع مفاتيح Gemini وبيانات Blogger OAuth و Pexels للعمل التلقائي.",
+                    text = "⚠️ يجب إدخال جميع مفاتيح API وبيانات Blogger OAuth و Pexels ورابط RSS للعمل التلقائي.",
                     modifier = Modifier.padding(12.dp),
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
@@ -71,11 +71,15 @@ fun DashboardScreen(prefs: PreferencesManager) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* يمكن تشغيل العامل يدوياً */ },
+            onClick = { dashboardViewModel.triggerPublishWorker() },
             modifier = Modifier.fillMaxWidth(),
-            enabled = allKeysSet
+            enabled = isSetupComplete && !isLoading
         ) {
-            Text(if (allKeysSet) "تشغيل النشر التلقائي الآن" else "الإعدادات غير مكتملة")
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+            } else {
+                Text(if (isSetupComplete) "تشغيل النشر التلقائي الآن" else "الإعدادات غير مكتملة")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
