@@ -33,12 +33,12 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose:2.7.7"
 
-    // 🌟 استدعاء حزم جوجل و Blogger بالإصدارات القياسية المستقرة والمتاحة دائماً 🌟
+    // 🌟 حزم اتصال جوجل الرسمية والحديثة المتاحة على Maven Central 🌟
     implementation "com.google.api-client:google-api-client:2.4.0"
     implementation "com.google.api-client:google-api-client-android:2.4.0"
     implementation "com.google.http-client:google-http-client-gson:1.44.1"
     
-    // سحب مكتبة Blogger القياسية المتوافقة مع الإصدارات الحديثة
+    // 🌟 التعديل الحاسم: استخدام حزمة Blogger القياسية المتاحة دائماً بدلاً من الإصدارات التاريخية المحذوفة 🌟
     implementation "com.google.apis:google-api-services-blogger:v3-rev20220322-1.32.1"
 
     // JSON & Network
@@ -57,7 +57,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
 }
 
-// توحيد نسخ المكتبات لمنع أي تعارض داخلي أثناء البناء
+// استراتيجية صارمة لتوحيد نسخ المكاتب لمنع أي تعارض داخلي بين مكاتب جوجل وكوتلن
 configurations.all {
     resolutionStrategy {
         force 'androidx.annotation:annotation:1.8.0'
