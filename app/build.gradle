@@ -45,7 +45,7 @@ dependencies {
     implementation "com.google.api-client:google-api-client:2.4.0"
     implementation "com.google.api-client:google-api-client-android:2.4.0"
     implementation "com.google.http-client:google-http-client-gson:1.44.1"
-    implementation "com.google.apis:google-api-services-blogger:v3-rev20220322-1.32.1"
+    implementation "com.google.apis:google-api-services-blogger:v3-rev20220226-1.32.1"
 
     // Network & JSON
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
