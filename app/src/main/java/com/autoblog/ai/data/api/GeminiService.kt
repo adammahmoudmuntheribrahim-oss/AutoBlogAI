@@ -4,6 +4,7 @@ import com.autoblog.ai.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -32,7 +33,7 @@ class GeminiService(private val prefs: PreferencesManager) {
 
         val request = Request.Builder()
             .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey")
-            .post(RequestBody.create(MediaType.parse("application/json"), jsonBody.toString()))
+            .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
             .build()
 
         return withContext(Dispatchers.IO) {
@@ -61,7 +62,7 @@ class GeminiService(private val prefs: PreferencesManager) {
 
             val request = Request.Builder()
                 .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey")
-                .post(RequestBody.create(MediaType.parse("application/json"), jsonBody.toString()))
+                .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
                 .build()
             
             withContext(Dispatchers.IO) {
