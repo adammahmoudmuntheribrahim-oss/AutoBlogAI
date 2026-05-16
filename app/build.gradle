@@ -15,6 +15,13 @@ android {
         versionName "1.0"
     }
 
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
     buildFeatures {
         compose true
     }
@@ -25,7 +32,7 @@ android {
 }
 
 dependencies {
-    // AndroidX & UI
+    // AndroidX & UI Compose
     implementation "androidx.core:core-ktx:1.13.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.2"
     implementation "androidx.activity:activity-compose:1.9.0"
@@ -34,12 +41,10 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose:2.7.7"
 
-    // Google API Client (النسخ الرسمية المستقرة على mavenCentral)
+    // Google API Client & Blogger (النسخ المعتمدة والآمنة)
     implementation "com.google.api-client:google-api-client:2.4.0"
     implementation "com.google.api-client:google-api-client-android:2.4.0"
     implementation "com.google.http-client:google-http-client-gson:1.44.1"
-    
-    // مكتبة Blogger الرسمية المتاحة دائماً وبصيغتها الصحيحة
     implementation "com.google.apis:google-api-services-blogger:v3-rev20220322-1.32.1"
 
     // Network & JSON
@@ -48,7 +53,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:2.11.0"
     implementation "com.google.code.gson:gson:2.10.1"
 
-    // Utilities & Background Tasks
+    // Storage, WorkManager & Utilities
     implementation "androidx.work:work-runtime-ktx:2.9.0"
     implementation "io.coil-kt:coil-compose:2.6.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
@@ -56,7 +61,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
 }
 
-// استراتيجية صارمة لتوحيد المكتبات المتعارضة داخلياً
+// حل مشكلة تضارب مكاتب جوجل مع مكاتب أندرويد الداخلية
 configurations.all {
     resolutionStrategy {
         force 'androidx.annotation:annotation:1.8.0'
