@@ -25,6 +25,7 @@ android {
 }
 
 dependencies {
+    // AndroidX & UI
     implementation "androidx.core:core-ktx:1.13.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.2"
     implementation "androidx.activity:activity-compose:1.9.0"
@@ -33,31 +34,29 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose:2.7.7"
 
-    // 🌟 حزم اتصال جوجل الرسمية والحديثة المتاحة على Maven Central 🌟
+    // Google API Client (النسخ الرسمية المستقرة على mavenCentral)
     implementation "com.google.api-client:google-api-client:2.4.0"
     implementation "com.google.api-client:google-api-client-android:2.4.0"
     implementation "com.google.http-client:google-http-client-gson:1.44.1"
     
-    // 🌟 التعديل الحاسم: استخدام حزمة Blogger القياسية المتاحة دائماً بدلاً من الإصدارات التاريخية المحذوفة 🌟
+    // مكتبة Blogger الرسمية المتاحة دائماً وبصيغتها الصحيحة
     implementation "com.google.apis:google-api-services-blogger:v3-rev20220322-1.32.1"
 
-    // JSON & Network
+    // Network & JSON
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
     implementation "com.squareup.retrofit2:retrofit:2.11.0"
     implementation "com.squareup.retrofit2:converter-gson:2.11.0"
     implementation "com.google.code.gson:gson:2.10.1"
 
-    // Background & Storage
+    // Utilities & Background Tasks
     implementation "androidx.work:work-runtime-ktx:2.9.0"
     implementation "io.coil-kt:coil-compose:2.6.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
-
-    // Icons
     implementation "androidx.compose.material:material-icons-extended"
 }
 
-// استراتيجية صارمة لتوحيد نسخ المكاتب لمنع أي تعارض داخلي بين مكاتب جوجل وكوتلن
+// استراتيجية صارمة لتوحيد المكتبات المتعارضة داخلياً
 configurations.all {
     resolutionStrategy {
         force 'androidx.annotation:annotation:1.8.0'
