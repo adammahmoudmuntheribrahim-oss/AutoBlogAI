@@ -6,10 +6,13 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
     }
 }
 rootProject.name = "AutoBlogAI"
