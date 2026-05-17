@@ -9,7 +9,7 @@ class SeoRepository(private val prefs: PreferencesManager) {
         return try {
             val prompt = "مناسبة للمقال التالي بالعربية SEO اقترح 5 وسوم: $title"
             val response = gemini.rewriteArticle(prompt)
-            response.split(",").take(5).joinToString(", ") { it.trim() }
+            response.content.split(",").take(5).joinToString(", ") { it.trim() }
         } catch (e: Exception) {
             "أندرويد، بلوجر، تقنية، أخبار، AI"
         }

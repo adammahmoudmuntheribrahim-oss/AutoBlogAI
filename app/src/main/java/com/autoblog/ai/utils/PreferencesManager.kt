@@ -39,7 +39,6 @@ class PreferencesManager(context: Context) {
 
     fun getRssFeedUrl(): String = sharedPreferences.getString("rss_feed_url", "") ?: ""
     fun setRssFeedUrl(url: String) = sharedPreferences.edit().putString("rss_feed_url", url).apply()
-    fun setPexelsApiKey(key: String) = sharedPreferences.edit().putString("pexels_api_key", key).apply()
 
     fun isAllKeysSet(): Boolean {
         return getGeminiApiKey().isNotEmpty() &&

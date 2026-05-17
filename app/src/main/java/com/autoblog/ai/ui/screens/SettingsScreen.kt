@@ -18,10 +18,13 @@ import androidx.compose.ui.unit.dp
 import com.autoblog.ai.data.api.*
 import com.autoblog.ai.utils.PreferencesManager
 import kotlinx.coroutines.launch
+import com.autoblog.ai.viewmodel.DashboardViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(dashboardViewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory)) {
     val context = LocalContext.current
     val prefs = remember { PreferencesManager(context) }
     val scope = rememberCoroutineScope()
@@ -197,6 +200,7 @@ fun SettingsScreen() {
                 prefs.setBloggerBlogId(blogId)
                 prefs.setPexelsApiKey(pexelsKey)
                 prefs.setRssFeedUrl(rssFeedUrl)
+                dashboardViewModel.updateSetupStatus()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

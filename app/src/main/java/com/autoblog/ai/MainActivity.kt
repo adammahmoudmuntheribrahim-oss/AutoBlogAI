@@ -17,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import com.autoblog.ai.ui.screens.DashboardScreen
 import com.autoblog.ai.ui.screens.SettingsScreen
 import com.autoblog.ai.ui.theme.AutoBlogAITheme
+import com.autoblog.ai.viewmodel.DashboardViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autoblog.ai.utils.PreferencesManager
 import com.autoblog.ai.workers.Scheduler
 
@@ -65,10 +67,10 @@ fun MainApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("dashboard") {
-                DashboardScreen(prefs = prefs)
+                DashboardScreen(prefs = prefs, dashboardViewModel = viewModel(factory = DashboardViewModel.Factory))
             }
             composable("settings") {
-                SettingsScreen()
+                SettingsScreen(dashboardViewModel = viewModel(factory = DashboardViewModel.Factory))
             }
         }
     }

@@ -2,6 +2,9 @@ package com.autoblog.ai.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
@@ -26,7 +29,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     val isLoading = _isLoading.asStateFlow()
 
     private val _isSetupComplete = MutableStateFlow(false)
-    val isSetupComplete = _isSetupFlow()
+    val isSetupComplete = _isSetupComplete.asStateFlow()
 
     private val workManager = WorkManager.getInstance(application)
     private val preferencesManager = PreferencesManager(application)
@@ -42,6 +45,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     _isLoading.value = running
                 }
         }
+        updateSetupStatus()
+    }
+
+    fun updateSetupStatus() {
         _isSetupComplete.value = preferencesManager.isAllKeysSet()
     }
 
@@ -67,5 +74,13 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         )
     }
 
-    private fun _isSetupFlow() = MutableStateFlow(preferencesManager.isAllKeysSet())
+    companion object {
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: androidx.lifecycle.viewmodel.CreationExtras): T {
+                val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+                return DashboardViewModel(application) as T
+            }
+        }
+    }
 }
