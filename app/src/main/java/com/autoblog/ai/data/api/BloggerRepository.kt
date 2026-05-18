@@ -1,7 +1,6 @@
 package com.autoblog.ai.data.api
 
 import com.autoblog.ai.utils.PreferencesManager
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.blogger.Blogger
@@ -10,8 +9,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class BloggerRepository(private val prefs: PreferencesManager) {
+@Singleton
+class BloggerRepository @Inject constructor(private val prefs: PreferencesManager) {
 
     private val applicationName = "AutoBlog-AI/1.0"
 
@@ -45,9 +47,9 @@ class BloggerRepository(private val prefs: PreferencesManager) {
         .build()
     }
 
-    suspend fun publishPost(title: String, content: String): Post = withContext(Dispatchers.IO) {
+    suspend fun publishPost(title: String, content: String): Boolean = withContext(Dispatchers.IO) {
         val blogId = prefs.getBloggerBlogId()
-        if (blogId.isEmpty()) throw Exception("معرف المدونة غير موجود")
+        if (blogId.isEmpty()) return@withContext false
 
         val service = getBloggerService()
         val post = Post().apply {
@@ -57,8 +59,9 @@ class BloggerRepository(private val prefs: PreferencesManager) {
 
         try {
             service.posts().insert(blogId, post).execute()
+            true
         } catch (e: IOException) {
-            throw Exception("فشل النشر: ${e.message}", e)
+            false
         }
     }
 

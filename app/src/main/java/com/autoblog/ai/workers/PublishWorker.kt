@@ -8,9 +8,17 @@ import com.autoblog.ai.data.repository.PostRepository
 import com.autoblog.ai.utils.LocalStorage
 import com.autoblog.ai.utils.PreferencesManager
 
-class PublishWorker(
-    context: Context,
-    params: WorkerParameters
+import androidx.hilt.work.HiltWorker
+import com.autoblog.ai.data.repository.PostRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+
+@HiltWorker
+class PublishWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted params: WorkerParameters,
+    private val repository: PostRepository,
+    private val prefs: PreferencesManager
 ) : CoroutineWorker(context, params) {
 
     companion object {
@@ -18,18 +26,11 @@ class PublishWorker(
     }
 
     override suspend fun doWork(): Result {
-        val prefs = PreferencesManager(applicationContext)
         if (!prefs.isAllKeysSet()) {
             return Result.failure()
         }
 
         return try {
-            val localStorage = LocalStorage(applicationContext)
-            val repository = PostRepository(
-                localStorage = localStorage,
-                rss = RssRepository(),
-                prefs = prefs
-            )
             repository.fetchAndProcess()
             Result.success()
         } catch (e: Exception) {

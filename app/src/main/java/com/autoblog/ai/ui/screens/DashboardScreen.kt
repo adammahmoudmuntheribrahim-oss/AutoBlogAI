@@ -3,116 +3,160 @@ package com.autoblog.ai.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autoblog.ai.data.model.Article
-import com.autoblog.ai.utils.LocalStorage
-import com.autoblog.ai.utils.PreferencesManager
+import com.autoblog.ai.data.model.PostStatus
 import com.autoblog.ai.viewmodel.DashboardViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(prefs: PreferencesManager, dashboardViewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory)) {
-    val context = LocalContext.current
-    val localStorage = remember { LocalStorage(context) }
-    val posts by dashboardViewModel.posts.collectAsState()
-    val isLoading by dashboardViewModel.isLoading.collectAsState()
-    val isSetupComplete by dashboardViewModel.isSetupComplete.collectAsState()
+fun DashboardScreen(viewModel: DashboardViewModel) {
+    val posts by viewModel.posts.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val isSetupComplete by viewModel.isSetupComplete.collectAsState()
+    
+    val totalCount by viewModel.totalArticles.collectAsState(0)
+    val publishedToday by viewModel.publishedToday.collectAsState(0)
+    val failedCount by viewModel.failedArticles.collectAsState(0)
+    val queueCount by viewModel.queueCount.collectAsState(0)
 
-    LaunchedEffect(Unit) {
-        dashboardViewModel.loadPosts(localStorage)
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "مدونة الذكاء الآلي",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        if (!isSetupComplete) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "⚠️ يجب إدخال جميع مفاتيح API وبيانات Blogger OAuth و Pexels ورابط RSS للعمل التلقائي.",
-                    modifier = Modifier.padding(12.dp),
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("لوحة التحكم", fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { viewModel.triggerPublishWorker() }, enabled = !isLoading && isSetupComplete) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Refresh, contentDescription = "تحديث")
+                        }
+                    }
+                }
+            )
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("📊 إحصائيات سريعة", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("عدد المقالات: ${posts.size}")
-                Text("آخر تحديث: ${if (posts.isNotEmpty()) "الآن" else "لا يوجد"}")
+            if (!isSetupComplete) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                            Spacer(Modifier.width(12.dp))
+                            Text("يرجى إكمال الإعدادات في صفحة الإعدادات لتفعيل الأتمتة.")
+                        }
+                    }
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { dashboardViewModel.triggerPublishWorker() },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isSetupComplete && !isLoading
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-            } else {
-                Text(if (isSetupComplete) "تشغيل النشر التلقائي الآن" else "الإعدادات غير مكتملة")
+            item {
+                AnalyticsSection(totalCount, publishedToday, failedCount, queueCount)
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            item {
+                Text("المقالات الأخيرة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
 
-        Text("قائمة المقالات", style = MaterialTheme.typography.titleMedium)
-
-        LazyColumn {
-            items(posts) { post ->
-                PostCard(post)
+            items(posts) { article ->
+                ArticleItem(article)
             }
         }
     }
 }
 
 @Composable
-fun PostCard(article: Article) {
+fun AnalyticsSection(total: Int, today: Int, failed: Int, queue: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatCard("الإجمالي", total.toString(), Icons.Default.Article, MaterialTheme.colorScheme.primaryContainer, Modifier.weight(1f))
+            StatCard("نشر اليوم", today.toString(), Icons.Default.Today, Color(0xFFC8E6C9), Modifier.weight(1f))
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatCard("في الانتظار", queue.toString(), Icons.Default.HourglassEmpty, Color(0xFFFFF9C4), Modifier.weight(1f))
+            StatCard("فشل", failed.toString(), Icons.Default.Error, MaterialTheme.colorScheme.errorContainer, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun StatCard(label: String, value: String, icon: ImageVector, containerColor: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.height(8.dp))
+            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+fun ArticleItem(article: Article) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(text = article.title, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = article.content.take(100) + "...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("الوسوم: ${article.tags}", style = MaterialTheme.typography.bodySmall)
-            Text("الحالة: ${if (article.published) "منشور" else "مسودة"}")
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusBadge(article.status)
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(article.createdAt)),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(article.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            if (article.status == PostStatus.FAILED && article.failureReason != null) {
+                Spacer(Modifier.height(4.dp))
+                Text("خطأ: ${article.failureReason}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
         }
+    }
+}
+
+@Composable
+fun StatusBadge(status: PostStatus) {
+    val (text, color) = when (status) {
+        PostStatus.PENDING -> "في الانتظار" to Color.Gray
+        PostStatus.PROCESSING -> "جاري المعالجة" to MaterialTheme.colorScheme.primary
+        PostStatus.FAILED -> "فشل" to MaterialTheme.colorScheme.error
+        PostStatus.PUBLISHED -> "تم النشر" to Color(0xFF4CAF50)
+    }
+    
+    Surface(
+        color = color.copy(alpha = 0.1f),
+        shape = MaterialTheme.shapes.small,
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.5f))
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = color
+        )
     }
 }

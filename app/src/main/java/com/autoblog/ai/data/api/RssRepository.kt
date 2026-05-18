@@ -4,15 +4,11 @@ import com.autoblog.ai.data.model.ArticleItem
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
-import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RssRepository {
-
-    private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .build()
+@Singleton
+class RssRepository @Inject constructor(private val okHttpClient: OkHttpClient) {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://example.com/") // Base URL is ignored for @Url, but required

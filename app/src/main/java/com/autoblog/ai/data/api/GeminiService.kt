@@ -10,17 +10,39 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
-class GeminiService(private val prefs: PreferencesManager) {
+import javax.inject.Inject
+import javax.inject.Singleton
 
-    private val client = OkHttpClient()
+@Singleton
+class GeminiService @Inject constructor(
+    private val prefs: PreferencesManager,
+    private val client: OkHttpClient
+) {
 
     suspend fun rewriteArticle(content: String): ArticleContent {
         val apiKey = prefs.getGeminiApiKey()
         if (apiKey.isEmpty()) throw Exception("مفتاح Gemini غير موجود")
 
         val prompt = """
-            أعد كتابة المقال التالي بطريقة احترافية مع تحسين السيو. يجب أن تتضمن الاستجابة عنوانًا جذابًا في السطر الأول، يليه المحتوى المعاد صياغته. لا تقم بتضمين أي مقدمات أو خاتمات إضافية غير العنوان والمحتوى.
+            You are an SEO expert blog writer.
+            Rewrite the following article in Arabic:
+            - Human-like style
+            - SEO optimized
+            - No plagiarism
+            - Add headings (HTML h2, h3)
+            - Add conclusion
+            - Arabic friendly
+            - Blogger HTML ready
             
+            Return the result in JSON format with the following fields:
+            - title: A catchy SEO title
+            - content: The rewritten article in HTML format
+            - metaDescription: A brief SEO meta description
+            - keywords: Comma-separated SEO keywords
+            - slug: A URL-friendly slug in English
+            - faqSchema: A basic FAQ schema in JSON-LD if applicable
+            
+            Article Content:
             $content
         """.trimIndent()
 
@@ -30,10 +52,13 @@ class GeminiService(private val prefs: PreferencesManager) {
                     put("text", prompt)
                 }))
             }))
+            put("generationConfig", JSONObject().apply {
+                put("response_mime_type", "application/json")
+            })
         }
 
         val request = Request.Builder()
-            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey")
+            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey")
             .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
             .build()
 
@@ -46,13 +71,18 @@ class GeminiService(private val prefs: PreferencesManager) {
                 val firstCandidate = candidates.getJSONObject(0)
                 val contentJson = firstCandidate.getJSONObject("content")
                 val parts = contentJson.getJSONArray("parts")
-                val rewrittenText = parts.getJSONObject(0).getString("text")
-
-                val lines = rewrittenText.split("\n", limit = 2)
-                val title = lines.firstOrNull()?.trim() ?: ""
-                val rewrittenContent = if (lines.size > 1) lines[1].trim() else ""
-
-                ArticleContent(title, rewrittenContent)
+                val responseText = parts.getJSONObject(0).getString("text")
+                
+                val resultJson = JSONObject(responseText)
+                
+                ArticleContent(
+                    title = resultJson.optString("title"),
+                    content = resultJson.optString("content"),
+                    metaDescription = resultJson.optString("metaDescription"),
+                    keywords = resultJson.optString("keywords"),
+                    slug = resultJson.optString("slug"),
+                    faqSchema = resultJson.optString("faqSchema")
+                )
             }
         }
     }
@@ -68,7 +98,7 @@ class GeminiService(private val prefs: PreferencesManager) {
             }
 
             val request = Request.Builder()
-                .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey")
+                .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey")
                 .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
                 .build()
             

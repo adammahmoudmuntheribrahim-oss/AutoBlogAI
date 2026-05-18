@@ -2,60 +2,64 @@ package com.autoblog.ai.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
+import androidx.work.*
+import com.autoblog.ai.data.db.ArticleDao
 import com.autoblog.ai.data.model.Article
-import com.autoblog.ai.utils.LocalStorage
+import com.autoblog.ai.data.model.PostStatus
+import com.autoblog.ai.data.repository.PostRepository
 import com.autoblog.ai.utils.PreferencesManager
 import com.autoblog.ai.workers.PublishWorker
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DashboardViewModel(application: Application) : AndroidViewModel(application) {
-    private val _posts = MutableStateFlow<List<Article>>(emptyList())
-    val posts = _posts.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-
-    private val _isSetupComplete = MutableStateFlow(false)
-    val isSetupComplete = _isSetupComplete.asStateFlow()
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
+    application: Application,
+    private val articleDao: ArticleDao,
+    private val repository: PostRepository,
+    private val prefs: PreferencesManager
+) : AndroidViewModel(application) {
 
     private val workManager = WorkManager.getInstance(application)
-    private val preferencesManager = PreferencesManager(application)
+
+    val posts: StateFlow<List<Article>> = articleDao.getAllArticles()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isSetupComplete = MutableStateFlow(prefs.isAllKeysSet())
+    val isSetupComplete: StateFlow<Boolean> = _isSetupComplete
+
+    // Analytics Stats
+    val totalArticles = posts.map { it.size }
+    val publishedToday = posts.map { list -> 
+        val today = System.currentTimeMillis() - 24 * 60 * 60 * 1000
+        list.count { it.status == PostStatus.PUBLISHED && it.createdAt > today }
+    }
+    val failedArticles = posts.map { it.count { p -> p.status == PostStatus.FAILED } }
+    val queueCount = posts.map { it.count { p -> p.status == PostStatus.PENDING || p.status == PostStatus.PROCESSING } }
 
     init {
+        observeWorkStatus()
+    }
+
+    private fun observeWorkStatus() {
         viewModelScope.launch {
             workManager.getWorkInfosForUniqueWorkLiveData(PublishWorker.WORK_NAME)
                 .asFlow()
-                .map { workInfos ->
-                    workInfos.any { it.state == WorkInfo.State.RUNNING }
-                }
-                .collect { running ->
-                    _isLoading.value = running
+                .collect { workInfos ->
+                    _isLoading.value = workInfos.any { it.state == WorkInfo.State.RUNNING }
                 }
         }
-        updateSetupStatus()
     }
 
     fun updateSetupStatus() {
-        _isSetupComplete.value = preferencesManager.isAllKeysSet()
-    }
-
-    fun loadPosts(storage: LocalStorage) {
-        viewModelScope.launch {
-            _posts.value = storage.loadArticles()
-        }
+        _isSetupComplete.value = prefs.isAllKeysSet()
     }
 
     fun triggerPublishWorker() {
@@ -63,24 +67,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val publishWorkRequest = OneTimeWorkRequestBuilder<PublishWorker>()
+        val request = OneTimeWorkRequestBuilder<PublishWorker>()
             .setConstraints(constraints)
             .build()
 
         workManager.enqueueUniqueWork(
             PublishWorker.WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            publishWorkRequest
+            request
         )
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: androidx.lifecycle.viewmodel.CreationExtras): T {
-                val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
-                return DashboardViewModel(application) as T
-            }
-        }
     }
 }

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".AutoBlogApp"
         android:allowBackup="true"
         android:label="مدونة الذكاء الآلي"
         android:supportsRtl="true"

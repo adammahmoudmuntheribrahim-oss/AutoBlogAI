@@ -37,8 +37,11 @@ class PreferencesManager(context: Context) {
     fun getPexelsApiKey(): String = sharedPreferences.getString("pexels_api_key", "") ?: ""
     fun setPexelsApiKey(key: String) = sharedPreferences.edit().putString("pexels_api_key", key).apply()
 
-    fun getRssFeedUrl(): String = sharedPreferences.getString("rss_feed_url", "") ?: ""
-    fun setRssFeedUrl(url: String) = sharedPreferences.edit().putString("rss_feed_url", url).apply()
+    fun getRssUrl(): String = sharedPreferences.getString("rss_feed_url", "") ?: ""
+    fun setRssUrl(url: String) = sharedPreferences.edit().putString("rss_feed_url", url).apply()
+    
+    fun getRssFeedUrl(): String = getRssUrl()
+    fun setRssFeedUrl(url: String) = setRssUrl(url)
 
     fun isAllKeysSet(): Boolean {
         return getGeminiApiKey().isNotEmpty() &&
@@ -47,6 +50,6 @@ class PreferencesManager(context: Context) {
                 getBloggerRefreshToken().isNotEmpty() &&
                 getBloggerBlogId().isNotEmpty() &&
                 getPexelsApiKey().isNotEmpty() &&
-                getRssFeedUrl().isNotEmpty()
+                getRssUrl().isNotEmpty()
     }
 }
