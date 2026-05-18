@@ -1,6 +1,8 @@
 package com.autoblog.ai.data.repository
 
 import com.autoblog.ai.data.api.*
+import com.autoblog.ai.utils.InternalLinker
+import com.autoblog.ai.utils.AiHumanizer
 import com.autoblog.ai.data.db.ArticleDao
 import com.autoblog.ai.data.model.Article
 import com.autoblog.ai.data.model.PostStatus
