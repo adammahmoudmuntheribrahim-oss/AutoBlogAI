@@ -2,6 +2,7 @@ package com.autoblog.ai.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -28,76 +29,177 @@ fun SettingsScreen(viewModel: DashboardViewModel) {
     var clientSecret by remember { mutableStateOf(prefs.getBloggerClientSecret()) }
     var refreshToken by remember { mutableStateOf(prefs.getBloggerRefreshToken()) }
     var rssUrl by remember { mutableStateOf(prefs.getRssUrl()) }
+    
+    var saveSuccess by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("الإعدادات", fontWeight = FontWeight.Bold) })
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            "الإعدادات",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            "إدارة مفاتيح API والإعدادات",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SettingsSection("مفاتيح الذكاء الاصطناعي", Icons.Default.Psychology) {
+            // رسالة النجاح
+            if (saveSuccess) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            "تم حفظ الإعدادات بنجاح",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(3000)
+                    saveSuccess = false
+                }
+            }
+
+            // قسم مفاتيح الذكاء الاصطناعي
+            SettingsSectionCard(
+                title = "مفاتيح الذكاء الاصطناعي",
+                icon = Icons.Default.Psychology,
+                description = "أدخل مفاتيح API الخاصة بخدمات الذكاء الاصطناعي"
+            ) {
                 OutlinedTextField(
                     value = geminiKey,
                     onValueChange = { geminiKey = it },
                     label = { Text("Gemini API Key") },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
                 OutlinedTextField(
                     value = pexelsKey,
                     onValueChange = { pexelsKey = it },
                     label = { Text("Pexels API Key") },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
             }
 
-            SettingsSection("إعدادات Blogger", Icons.Default.RssFeed) {
+            // قسم إعدادات Blogger
+            SettingsSectionCard(
+                title = "إعدادات Blogger",
+                icon = Icons.Default.RssFeed,
+                description = "أدخل بيانات اعتماد حسابك على Blogger"
+            ) {
                 OutlinedTextField(
                     value = blogId,
                     onValueChange = { blogId = it },
                     label = { Text("Blog ID") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Article, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
                 OutlinedTextField(
                     value = clientId,
                     onValueChange = { clientId = it },
                     label = { Text("Client ID") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Fingerprint, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
                 OutlinedTextField(
                     value = clientSecret,
                     onValueChange = { clientSecret = it },
                     label = { Text("Client Secret") },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
                 OutlinedTextField(
                     value = refreshToken,
                     onValueChange = { refreshToken = it },
                     label = { Text("Refresh Token") },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.VpnKey, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
             }
 
-            SettingsSection("مصادر المحتوى", Icons.Default.Link) {
+            // قسم مصادر المحتوى
+            SettingsSectionCard(
+                title = "مصادر المحتوى",
+                icon = Icons.Default.Link,
+                description = "أدخل روابط خلاصات RSS"
+            ) {
                 OutlinedTextField(
                     value = rssUrl,
                     onValueChange = { rssUrl = it },
                     label = { Text("RSS Feed URL") },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("https://example.com/feed") }
+                    placeholder = { Text("https://example.com/feed") },
+                    shape = RoundedCornerShape(10.dp),
+                    leadingIcon = {
+                        Icon(Icons.Default.Feed, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 )
             }
 
+            // زر الحفظ
             Button(
                 onClick = {
                     prefs.setGeminiApiKey(geminiKey)
@@ -108,33 +210,88 @@ fun SettingsScreen(viewModel: DashboardViewModel) {
                     prefs.setBloggerRefreshToken(refreshToken)
                     prefs.setRssUrl(rssUrl)
                     viewModel.updateSetupStatus()
+                    saveSuccess = true
                 },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Icon(Icons.Default.Save, contentDescription = null)
+                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("حفظ الإعدادات")
+                Text("حفظ الإعدادات", fontWeight = FontWeight.SemiBold)
             }
-            
+
             Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun SettingsSection(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsSectionCard(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    description: String = "",
+    content: @Composable ColumnScope.() -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(8.dp))
-                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // الرأس
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                    )
+                }
+                
+                Column {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (description.isNotEmpty()) {
+                        Text(
+                            description,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
-            HorizontalDivider()
+            
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                thickness = 1.dp
+            )
+            
+            // المحتوى
             content()
         }
     }

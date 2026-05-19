@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
         Scheduler.start(this)
 
         setContent {
-            AutoBlogAITheme {
+            AutoBlogAITheme(darkTheme = true) {
                 MainApp()
             }
         }
@@ -42,7 +44,11 @@ fun MainApp() {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                modifier = Modifier,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 
@@ -50,13 +56,27 @@ fun MainApp() {
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
                     label = { Text("الرئيسية") },
                     selected = currentDestination?.route == "dashboard",
-                    onClick = { navController.navigate("dashboard") }
+                    onClick = { navController.navigate("dashboard") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("الإعدادات") },
                     selected = currentDestination?.route == "settings",
-                    onClick = { navController.navigate("settings") }
+                    onClick = { navController.navigate("settings") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    )
                 )
             }
         }
