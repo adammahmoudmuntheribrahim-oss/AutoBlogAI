@@ -1,0 +1,13 @@
+<resources>
+    <string-array name="length_options">
+        <item>قصير</item>
+        <item>متوسط</item>
+        <item>طويل</item>
+        <item>تلقائي</item>
+    </string-array>
+    <string-array name="personality_options">
+        <item>الناقد</item>
+        <item>المتفائل</item>
+        <item>الواقعي</item>
+    </string-array>
+</resources>

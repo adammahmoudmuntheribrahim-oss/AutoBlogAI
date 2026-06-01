@@ -1,0 +1,141 @@
+package com.example.articleautomator
+
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
+import com.example.articleautomator.data.LogRepository
+import com.example.articleautomator.ui.LogAdapter
+import com.example.articleautomator.ui.RssAdapter
+import com.example.articleautomator.workflow.BloggerPublisher
+import com.example.articleautomator.workflow.PinterestPublisher
+import com.example.articleautomator.worker.ArticleWorker
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+    
+    @Inject lateinit var logRepository: LogRepository
+    @Inject lateinit var bloggerPublisher: BloggerPublisher
+    @Inject lateinit var pinterestPublisher: PinterestPublisher
+
+    private lateinit var logAdapter: LogAdapter
+    private lateinit var rssAdapter: RssAdapter
+    private val rssUrls = mutableListOf<String>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        setupRecyclerViews()
+        setupButtons()
+        observeLogs()
+    }
+
+    private fun setupRecyclerViews() {
+        val logRecycler = findViewById<RecyclerView>(R.id.log_recycler)
+        logAdapter = LogAdapter(mutableListOf())
+        logRecycler.adapter = logAdapter
+        logRecycler.layoutManager = LinearLayoutManager(this)
+
+        val rssRecycler = findViewById<RecyclerView>(R.id.rss_recycler)
+        val savedUrls = getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getStringSet("rss_urls", emptySet())?.toList() ?: emptyList()
+        rssUrls.addAll(savedUrls)
+        rssAdapter = RssAdapter(rssUrls) { position ->
+            rssUrls.removeAt(position)
+            rssAdapter.notifyItemRemoved(position)
+            saveRssUrls()
+        }
+        rssRecycler.adapter = rssAdapter
+        rssRecycler.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun setupButtons() {
+        findViewById<Button>(R.id.add_rss_button).setOnClickListener {
+            val url = findViewById<EditText>(R.id.new_rss_url).text.toString().trim()
+            if (url.isNotEmpty() && url.startsWith("http")) {
+                rssAdapter.addUrl(url)
+                findViewById<EditText>(R.id.new_rss_url).text.clear()
+                saveRssUrls()
+            }
+        }
+
+        findViewById<Button>(R.id.settings_button).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        val authLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val code = result.data?.getStringExtra("code") ?: return@registerForActivityResult
+                val provider = result.data?.getStringExtra("provider") ?: "google"
+                
+                lifecycleScope.launch {
+                    try {
+                        if (provider == "google") {
+                            bloggerPublisher.authenticateWithCode(code)
+                            logRepository.addLog("تم ربط Blogger بنجاح", "SUCCESS")
+                        } else {
+                            pinterestPublisher.authenticateWithCode(code)
+                            logRepository.addLog("تم ربط Pinterest بنجاح", "SUCCESS")
+                        }
+                    } catch (e: Exception) {
+                        logRepository.addLog("فشل الربط: ${e.message}", "ERROR")
+                    }
+                }
+            }
+        }
+
+        findViewById<Button>(R.id.auth_blogger).setOnClickListener {
+            val intent = Intent(this, AuthActivity::class.java).apply {
+                putExtra("auth_url", bloggerPublisher.getAuthUrl())
+            }
+            authLauncher.launch(intent)
+        }
+
+        // Assuming there's a button for Pinterest in layout, if not, it should be added
+        findViewById<Button>(R.id.auth_pinterest)?.setOnClickListener {
+            val intent = Intent(this, AuthActivity::class.java).apply {
+                putExtra("auth_url", pinterestPublisher.getAuthUrl())
+            }
+            authLauncher.launch(intent)
+        }
+
+        findViewById<Button>(R.id.start_worker).setOnClickListener {
+            val isRandom = getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean("random_scheduling", false)
+            if (isRandom) {
+                val request = OneTimeWorkRequestBuilder<ArticleWorker>().build()
+                WorkManager.getInstance(this).enqueueUniqueWork("ArticleWorker_Random", ExistingWorkPolicy.REPLACE, request)
+            } else {
+                val request = PeriodicWorkRequestBuilder<ArticleWorker>(1, TimeUnit.HOURS).build()
+                WorkManager.getInstance(this).enqueueUniquePeriodicWork("ArticleWorker_Periodic", ExistingPeriodicWorkPolicy.UPDATE, request)
+            }
+            Toast.makeText(this, "بدأت الجدولة", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun observeLogs() {
+        viewModel.logs.observe(this) { logs ->
+            logAdapter.updateData(logs)
+            findViewById<RecyclerView>(R.id.log_recycler).scrollToPosition(logs.size - 1)
+        }
+    }
+
+    private fun saveRssUrls() {
+        getSharedPreferences("settings", Context.MODE_PRIVATE).edit()
+            .putStringSet("rss_urls", rssUrls.toSet())
+            .apply()
+    }
+}

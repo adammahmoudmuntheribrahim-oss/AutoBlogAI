@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="إعدادات Blogger"
+            android:textStyle="bold"
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/blogger_client_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Client ID"/>
+        <EditText
+            android:id="@+id/blogger_secret"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Client Secret"
+            android:inputType="textPassword"/>
+        <EditText
+            android:id="@+id/blog_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Blog ID"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="مفاتيح Gemini (مفتاح في كل سطر)"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+        <EditText
+            android:id="@+id/gemini_keys"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:gravity="top"
+            android:hint="أدخل المفاتيح هنا..."/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="خيارات المحتوى"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+        <Spinner
+            android:id="@+id/length_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/length_options"/>
+        <Spinner
+            android:id="@+id/personality_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:entries="@array/personality_options"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الجدولة"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+        <Switch
+            android:id="@+id/random_scheduling"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="جدولة عشوائية"/>
+        <EditText
+            android:id="@+id/max_delay_minutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="أقصى تأخير بالدقائق (مثلاً 240)"
+            android:inputType="number"/>
+
+        <Button
+            android:id="@+id/save_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="حفظ الإعدادات"
+            android:layout_marginTop="24dp"/>
+
+    </LinearLayout>
+</ScrollView>
