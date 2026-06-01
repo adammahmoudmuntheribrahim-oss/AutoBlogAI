@@ -39,6 +39,8 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -67,7 +69,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     
     // RSS
-    implementation("com.rometools:rome:2.1.0")
+    implementation("com.rometools:rome:1.18.0")
+    implementation("org.jdom:jdom2:2.0.6.1")
     
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
