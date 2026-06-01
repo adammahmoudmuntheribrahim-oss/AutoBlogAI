@@ -35,6 +35,30 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="إعدادات Pinterest"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"/>
+        <EditText
+            android:id="@+id/pinterest_app_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pinterest App ID"/>
+        <EditText
+            android:id="@+id/pinterest_secret"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pinterest App Secret"
+            android:inputType="textPassword"/>
+        <EditText
+            android:id="@+id/pinterest_board_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pinterest Board ID"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="مفاتيح Gemini (مفتاح في كل سطر)"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>

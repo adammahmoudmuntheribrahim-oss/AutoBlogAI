@@ -99,18 +99,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.auth_blogger).setOnClickListener {
-            val intent = Intent(this, AuthActivity::class.java).apply {
-                putExtra("auth_url", bloggerPublisher.getAuthUrl())
+            try {
+                val intent = Intent(this, AuthActivity::class.java).apply {
+                    putExtra("auth_url", bloggerPublisher.getAuthUrl())
+                }
+                authLauncher.launch(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
             }
-            authLauncher.launch(intent)
         }
 
-        // Assuming there's a button for Pinterest in layout, if not, it should be added
         findViewById<Button>(R.id.auth_pinterest)?.setOnClickListener {
-            val intent = Intent(this, AuthActivity::class.java).apply {
-                putExtra("auth_url", pinterestPublisher.getAuthUrl())
+            try {
+                val intent = Intent(this, AuthActivity::class.java).apply {
+                    putExtra("auth_url", pinterestPublisher.getAuthUrl())
+                }
+                authLauncher.launch(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
             }
-            authLauncher.launch(intent)
         }
 
         findViewById<Button>(R.id.start_worker).setOnClickListener {

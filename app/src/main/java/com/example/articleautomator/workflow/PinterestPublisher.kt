@@ -64,6 +64,9 @@ class PinterestPublisher @Inject constructor(
 
     fun getAuthUrl(): String {
         val appId = prefs.getString("pinterest_app_id", "") ?: ""
+        if (appId.isBlank()) {
+            throw Exception("يرجى إدخال Pinterest App ID في الإعدادات أولاً")
+        }
         val state = tokenManager.generateState()
         val verifier = tokenManager.generateCodeVerifier()
         val challenge = tokenManager.generateCodeChallenge(verifier)

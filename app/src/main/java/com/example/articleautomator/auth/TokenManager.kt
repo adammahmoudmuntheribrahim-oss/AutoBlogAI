@@ -62,9 +62,9 @@ class TokenManager @Inject constructor(
 
     private fun refreshBloggerToken(refreshToken: String): String? = runBlocking {
         try {
-            val sharedPrefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val sharedPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             val clientId = sharedPrefs.getString("blogger_client_id", "") ?: ""
-            val clientSecret = sharedPrefs.getString("blogger_client_secret", "") ?: ""
+            val clientSecret = sharedPrefs.getString("blogger_secret", "") ?: ""
             
             val response = googleTokenApi.get().refreshToken(clientId, clientSecret, refreshToken)
             saveBloggerTokens(response.access_token, response.refresh_token ?: refreshToken, response.expires_in)
@@ -104,7 +104,7 @@ class TokenManager @Inject constructor(
 
     private fun refreshPinterestToken(refreshToken: String): String? = runBlocking {
         try {
-            val sharedPrefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val sharedPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             val clientId = sharedPrefs.getString("pinterest_app_id", "") ?: ""
             val clientSecret = sharedPrefs.getString("pinterest_secret", "") ?: ""
             val auth = android.util.Base64.encodeToString("$clientId:$clientSecret".toByteArray(), android.util.Base64.NO_WRAP)

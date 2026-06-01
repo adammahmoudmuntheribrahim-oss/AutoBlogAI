@@ -66,6 +66,9 @@ class BloggerPublisher @Inject constructor(
 
     fun getAuthUrl(): String {
         val clientId = prefs.getString("blogger_client_id", "") ?: ""
+        if (clientId.isBlank()) {
+            throw Exception("يرجى إدخال Blogger Client ID في الإعدادات أولاً")
+        }
         val state = tokenManager.generateState()
         val verifier = tokenManager.generateCodeVerifier()
         val challenge = tokenManager.generateCodeChallenge(verifier)
