@@ -70,7 +70,8 @@ dependencies {
     
     // RSS
     implementation("com.rometools:rome:1.18.0")
-    implementation("org.jdom:jdom2:2.0.6.1")
+    // ROME 1.18.0 requires jdom 2.0.6
+    implementation("org.jdom:jdom2:2.0.6")
     
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
