@@ -69,9 +69,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     
     // RSS
-    implementation("com.rometools:rome:1.18.0")
-    // ROME 1.18.0 requires jdom 2.0.6
-    implementation("org.jdom:jdom2:2.0.6")
+    implementation("com.rometools:rome:2.1.0")
     
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")

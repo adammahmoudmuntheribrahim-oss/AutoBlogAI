@@ -1,6 +1,7 @@
 package com.example.articleautomator.workflow
 
 import com.example.articleautomator.model.RssItem
+import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.feed.synd.SyndFeedInput
 import com.rometools.rome.io.XmlReader
 import java.net.URL
