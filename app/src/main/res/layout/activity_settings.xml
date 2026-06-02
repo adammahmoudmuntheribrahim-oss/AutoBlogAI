@@ -105,12 +105,20 @@
             android:hint="أقصى تأخير بالدقائق (مثلاً 240)"
             android:inputType="number"/>
 
+        <ProgressBar
+            android:id="@+id/settings_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="16dp"/>
+
         <Button
             android:id="@+id/save_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="حفظ الإعدادات"
-            android:layout_marginTop="24dp"/>
+            android:layout_marginTop="16dp"/>
 
     </LinearLayout>
 </ScrollView>

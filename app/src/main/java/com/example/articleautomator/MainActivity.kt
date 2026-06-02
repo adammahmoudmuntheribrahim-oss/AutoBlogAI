@@ -64,12 +64,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        findViewById<Button>(R.id.add_rss_button).setOnClickListener {
-            val url = findViewById<EditText>(R.id.new_rss_url).text.toString().trim()
+        val addRssButton = findViewById<Button>(R.id.add_rss_button)
+        val rssProgressBar = findViewById<ProgressBar>(R.id.rss_progress)
+        val rssInput = findViewById<EditText>(R.id.new_rss_url)
+
+        addRssButton.setOnClickListener {
+            val url = rssInput.text.toString().trim()
             if (url.isNotEmpty() && url.startsWith("http")) {
-                rssAdapter.addUrl(url)
-                findViewById<EditText>(R.id.new_rss_url).text.clear()
-                saveRssUrls()
+                addRssButton.isEnabled = false
+                rssProgressBar.visibility = android.view.View.VISIBLE
+                
+                lifecycleScope.launch {
+                    val isValid = viewModel.validateRssUrl(url)
+                    rssProgressBar.visibility = android.view.View.GONE
+                    addRssButton.isEnabled = true
+                    
+                    if (isValid) {
+                        rssAdapter.addUrl(url)
+                        rssInput.text.clear()
+                        saveRssUrls()
+                        Toast.makeText(this@MainActivity, "تمت إضافة الرابط بنجاح", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "رابط RSS غير صالح أو لا يحتوي على مقالات", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
 

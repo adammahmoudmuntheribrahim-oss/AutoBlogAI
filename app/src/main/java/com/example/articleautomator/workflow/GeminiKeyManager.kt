@@ -1,12 +1,20 @@
 package com.example.articleautomator.workflow
 
 import android.content.Context
+import com.example.articleautomator.api.Content
+import com.example.articleautomator.api.GeminiApiService
+import com.example.articleautomator.api.GeminiRequest
+import com.example.articleautomator.api.Part
+import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GeminiKeyManager @Inject constructor(@ApplicationContext private val context: Context) {
+class GeminiKeyManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val api: Lazy<GeminiApiService>
+) {
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private var keys: List<String> = prefs.getStringSet("gemini_keys", emptySet())?.toList() ?: emptyList()
     private var currentIndex = 0
@@ -27,5 +35,15 @@ class GeminiKeyManager @Inject constructor(@ApplicationContext private val conte
     fun updateKeys(newKeys: List<String>) {
         keys = newKeys
         prefs.edit().putStringSet("gemini_keys", keys.toSet()).apply()
+    }
+
+    suspend fun validateKey(key: String): Boolean {
+        return try {
+            val request = GeminiRequest(listOf(Content(listOf(Part("hi")))))
+            api.get().generateContent(key, request)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }

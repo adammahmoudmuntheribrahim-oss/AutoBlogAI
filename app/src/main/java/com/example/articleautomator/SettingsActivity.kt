@@ -2,8 +2,11 @@ package com.example.articleautomator
 
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.articleautomator.model.WriterPersonality
 import com.example.articleautomator.workflow.GeminiKeyManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,11 +46,38 @@ class SettingsActivity : AppCompatActivity() {
         randomSwitch.isChecked = prefs.getBoolean("random_scheduling", false)
         maxDelay.setText(prefs.getInt("max_delay_minutes", 240).toString())
 
-        findViewById<Button>(R.id.save_settings).setOnClickListener {
+        val saveButton = findViewById<Button>(R.id.save_settings)
+        val progressBar = findViewById<ProgressBar>(R.id.settings_progress)
+
+        saveButton.setOnClickListener {
             val keys = geminiKeys.text.toString().split("\n").filter { it.isNotBlank() }
-            geminiKeyManager.updateKeys(keys)
             
-            prefs.edit().apply {
+            saveButton.isEnabled = false
+            progressBar.visibility = View.VISIBLE
+
+            lifecycleScope.launch {
+                val validKeys = mutableListOf<String>()
+                val invalidKeys = mutableListOf<String>()
+                
+                for (key in keys) {
+                    if (geminiKeyManager.validateKey(key)) {
+                        validKeys.add(key)
+                    } else {
+                        invalidKeys.add(key)
+                    }
+                }
+                
+                progressBar.visibility = View.GONE
+                saveButton.isEnabled = true
+
+                if (invalidKeys.isNotEmpty()) {
+                    Toast.makeText(this@SettingsActivity, "بعض المفاتيح غير صالحة ولن يتم حفظها", Toast.LENGTH_LONG).show()
+                }
+
+                geminiKeyManager.updateKeys(validKeys)
+                geminiKeys.setText(validKeys.joinToString("\n"))
+                
+                prefs.edit().apply {
                 putString("blogger_client_id", bloggerClientId.text.toString())
                 putString("blogger_secret", bloggerSecret.text.toString())
                 putString("blog_id", blogId.text.toString())
@@ -60,8 +90,9 @@ class SettingsActivity : AppCompatActivity() {
                 putInt("max_delay_minutes", maxDelay.text.toString().toIntOrNull() ?: 240)
                 apply()
             }
-            Toast.makeText(this, "تم حفظ الإعدادات", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@SettingsActivity, "تم حفظ الإعدادات", Toast.LENGTH_SHORT).show()
             finish()
+            }
         }
     }
 }
