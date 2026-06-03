@@ -24,12 +24,13 @@ class ArticleWorker @AssistedInject constructor(
         val personalityName = prefs.getString("personality", WriterPersonality.REALIST.name)
         val personality = WriterPersonality.valueOf(personalityName ?: WriterPersonality.REALIST.name)
         val isRandom = prefs.getBoolean("random_scheduling", false)
+        val pinterestEnabled = prefs.getBoolean("pinterest_enabled", true)
 
         if (rssUrls.isEmpty()) return Result.success()
 
         // Execute workflow for a random RSS URL or all
         val targetUrl = rssUrls.random()
-        workflow.execute(targetUrl, lengthOption, personality)
+        workflow.execute(targetUrl, lengthOption, personality, pinterestEnabled)
 
         // If random scheduling is on, schedule next run with random delay
         if (isRandom) {

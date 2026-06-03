@@ -39,9 +39,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setSupportActionBar(findViewById(R.id.toolbar))
         setupRecyclerViews()
         setupButtons()
         observeLogs()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updatePinterestButtonVisibility()
+    }
+
+    private fun updatePinterestButtonVisibility() {
+        val pinterestEnabled = getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getBoolean("pinterest_enabled", true)
+        findViewById<Button>(R.id.auth_pinterest)?.visibility = if (pinterestEnabled) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     private fun setupRecyclerViews() {

@@ -1,124 +1,284 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="الإعدادات"
+            app:titleTextColor="@color/on_primary"
+            android:background="@color/primary"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="إعدادات Blogger"
-            android:textStyle="bold"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/blogger_client_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Client ID"/>
-        <EditText
-            android:id="@+id/blogger_secret"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Client Secret"
-            android:inputType="textPassword"/>
-        <EditText
-            android:id="@+id/blog_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Blog ID"/>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="إعدادات Pinterest"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"/>
-        <EditText
-            android:id="@+id/pinterest_app_id"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Pinterest App ID"/>
-        <EditText
-            android:id="@+id/pinterest_secret"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Pinterest App Secret"
-            android:inputType="textPassword"/>
-        <EditText
-            android:id="@+id/pinterest_board_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Pinterest Board ID"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="مفاتيح Gemini (مفتاح في كل سطر)"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-        <EditText
-            android:id="@+id/gemini_keys"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:gravity="top"
-            android:hint="أدخل المفاتيح هنا..."/>
+            <!-- Blogger Settings -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="إعدادات Blogger"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="12dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="خيارات المحتوى"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-        <Spinner
-            android:id="@+id/length_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/length_options"/>
-        <Spinner
-            android:id="@+id/personality_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:entries="@array/personality_options"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Client ID"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/blogger_client_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="الجدولة"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-        <Switch
-            android:id="@+id/random_scheduling"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="جدولة عشوائية"/>
-        <EditText
-            android:id="@+id/max_delay_minutes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="أقصى تأخير بالدقائق (مثلاً 240)"
-            android:inputType="number"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Client Secret"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/blogger_secret"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
+                    </com.google.android.material.textfield.TextInputLayout>
 
-        <ProgressBar
-            android:id="@+id/settings_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Blog ID"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/blog_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/save_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="حفظ الإعدادات"
-            android:layout_marginTop="16dp"/>
+            <!-- Pinterest Settings -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="إعدادات Pinterest"
+                            android:textStyle="bold"
+                            android:textSize="16sp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/pinterest_enabled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"/>
+                    </LinearLayout>
 
-    </LinearLayout>
-</ScrollView>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pinterest App ID"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/pinterest_app_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pinterest App Secret"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/pinterest_secret"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pinterest Board ID"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/pinterest_board_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Gemini Settings -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="مفاتيح Gemini"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="أدخل مفتاح في كل سطر"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/gemini_keys"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:gravity="top"
+                            android:inputType="textMultiLine"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Content Options -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="خيارات المحتوى والجدولة"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="طول المقال:"
+                        android:layout_marginBottom="4dp"/>
+                    <Spinner
+                        android:id="@+id/length_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="شخصية الكاتب:"
+                        android:layout_marginBottom="4dp"/>
+                    <Spinner
+                        android:id="@+id/personality_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/random_scheduling"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="جدولة عشوائية"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="أقصى تأخير (بالدقائق)"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/max_delay_minutes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <ProgressBar
+                android:id="@+id/settings_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="حفظ جميع الإعدادات"
+                android:padding="12dp"
+                app:cornerRadius="8dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

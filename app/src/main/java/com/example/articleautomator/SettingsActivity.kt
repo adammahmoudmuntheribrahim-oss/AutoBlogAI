@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.launch
 import com.example.articleautomator.model.WriterPersonality
 import com.example.articleautomator.workflow.GeminiKeyManager
@@ -29,10 +30,11 @@ class SettingsActivity : AppCompatActivity() {
         val pinterestAppId = findViewById<EditText>(R.id.pinterest_app_id)
         val pinterestSecret = findViewById<EditText>(R.id.pinterest_secret)
         val pinterestBoardId = findViewById<EditText>(R.id.pinterest_board_id)
+        val pinterestEnabled = findViewById<SwitchMaterial>(R.id.pinterest_enabled)
         val geminiKeys = findViewById<EditText>(R.id.gemini_keys)
         val lengthSpinner = findViewById<Spinner>(R.id.length_spinner)
         val personalitySpinner = findViewById<Spinner>(R.id.personality_spinner)
-        val randomSwitch = findViewById<Switch>(R.id.random_scheduling)
+        val randomSwitch = findViewById<SwitchMaterial>(R.id.random_scheduling)
         val maxDelay = findViewById<EditText>(R.id.max_delay_minutes)
 
         // Load values
@@ -42,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         pinterestAppId.setText(prefs.getString("pinterest_app_id", ""))
         pinterestSecret.setText(prefs.getString("pinterest_secret", ""))
         pinterestBoardId.setText(prefs.getString("board_id", ""))
+        pinterestEnabled.isChecked = prefs.getBoolean("pinterest_enabled", true)
         geminiKeys.setText(geminiKeyManager.getAllKeys().joinToString("\n"))
         randomSwitch.isChecked = prefs.getBoolean("random_scheduling", false)
         maxDelay.setText(prefs.getInt("max_delay_minutes", 240).toString())
@@ -84,6 +87,7 @@ class SettingsActivity : AppCompatActivity() {
                 putString("pinterest_app_id", pinterestAppId.text.toString())
                 putString("pinterest_secret", pinterestSecret.text.toString())
                 putString("board_id", pinterestBoardId.text.toString())
+                putBoolean("pinterest_enabled", pinterestEnabled.isChecked)
                 putString("length_option", lengthSpinner.selectedItem.toString())
                 putString("personality", WriterPersonality.values()[personalitySpinner.selectedItemPosition].name)
                 putBoolean("random_scheduling", randomSwitch.isChecked)

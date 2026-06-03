@@ -34,7 +34,7 @@ class ArticleWorkflow @Inject constructor(
         return block() // Last attempt
     }
 
-    suspend fun execute(rssUrl: String, lengthOption: String, personality: WriterPersonality) {
+    suspend fun execute(rssUrl: String, lengthOption: String, personality: WriterPersonality, pinterestEnabled: Boolean = true) {
         withContext(Dispatchers.IO) {
             try {
                 logRepository.addLog("بدء سير العمل للرابط: $rssUrl", "INFO")
@@ -74,11 +74,15 @@ class ArticleWorkflow @Inject constructor(
                 }
                 logRepository.addLog("تم النشر على Blogger: $blogUrl", "SUCCESS")
 
-                try {
-                    retry { pinterestPublisher.createPin(blogUrl, imageUrl, item.title) }
-                    logRepository.addLog("تم إنشاء Pin في Pinterest", "SUCCESS")
-                } catch (e: Exception) {
-                    logRepository.addLog("فشل النشر على Pinterest (اختياري): ${e.message}", "INFO")
+                if (pinterestEnabled) {
+                    try {
+                        retry { pinterestPublisher.createPin(blogUrl, imageUrl, item.title) }
+                        logRepository.addLog("تم إنشاء Pin في Pinterest", "SUCCESS")
+                    } catch (e: Exception) {
+                        logRepository.addLog("فشل النشر على Pinterest (اختياري): ${e.message}", "INFO")
+                    }
+                } else {
+                    logRepository.addLog("تم تخطي النشر على Pinterest (معطل من الإعدادات)", "INFO")
                 }
 
                 publishedDao.insert(PublishedArticle(guid = item.guid, contentHash = item.contentHash))
