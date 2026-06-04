@@ -55,8 +55,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Client ID"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/blogger_client_id"
                             android:layout_width="match_parent"
@@ -68,8 +70,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Client Secret"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/blogger_secret"
                             android:layout_width="match_parent"
@@ -82,6 +86,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Blog ID"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/blog_id"
@@ -130,8 +136,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest App ID"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/pinterest_app_id"
                             android:layout_width="match_parent"
@@ -143,8 +151,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest App Secret"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/pinterest_secret"
                             android:layout_width="match_parent"
@@ -157,6 +167,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest Board ID"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/pinterest_board_id"
@@ -193,6 +205,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="أدخل مفتاح في كل سطر"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/gemini_keys"
@@ -262,6 +276,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="أقصى تأخير (بالدقائق)"
+                        app:errorEnabled="true"
+                        app:helperTextEnabled="true"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/max_delay_minutes"
