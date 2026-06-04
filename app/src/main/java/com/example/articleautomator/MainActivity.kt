@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
+import com.google.android.material.snackbar.Snackbar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -113,17 +114,22 @@ class MainActivity : AppCompatActivity() {
                 val provider = result.data?.getStringExtra("provider") ?: "google"
                 
                 lifecycleScope.launch {
-                    try {
-                        if (provider == "google") {
-                            bloggerPublisher.authenticateWithCode(code)
-                            logRepository.addLog("تم ربط Blogger بنجاح", "SUCCESS")
-                        } else {
-                            pinterestPublisher.authenticateWithCode(code)
-                            logRepository.addLog("تم ربط Pinterest بنجاح", "SUCCESS")
-                        }
-                    } catch (e: Exception) {
-                        logRepository.addLog("فشل الربط: ${e.message}", "ERROR")
-                    }
+	                    try {
+	                        if (provider == "google") {
+	                            bloggerPublisher.authenticateWithCode(code)
+	                            logRepository.addLog("تم ربط Blogger بنجاح", "SUCCESS")
+	                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Blogger بنجاح", Snackbar.LENGTH_LONG).show()
+	                        } else {
+	                            pinterestPublisher.authenticateWithCode(code)
+	                            logRepository.addLog("تم ربط Pinterest بنجاح", "SUCCESS")
+	                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Pinterest بنجاح", Snackbar.LENGTH_LONG).show()
+	                        }
+	                    } catch (e: Exception) {
+	                        logRepository.addLog("فشل الربط: ${e.message}", "ERROR")
+	                        Snackbar.make(findViewById(android.R.id.content), "فشل الربط: ${e.message}", Snackbar.LENGTH_INDEFINITE)
+	                            .setAction("إغلاق") {}
+	                            .show()
+	                    }
                 }
             }
         }
