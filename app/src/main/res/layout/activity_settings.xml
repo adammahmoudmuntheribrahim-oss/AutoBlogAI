@@ -51,6 +51,7 @@
                         android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_blogger_client_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Client ID"
@@ -63,6 +64,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_blogger_secret"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Client Secret"
@@ -76,6 +78,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_blog_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Blog ID"
@@ -123,6 +126,7 @@
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_pinterest_app_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest App ID"
@@ -135,6 +139,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_pinterest_secret"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest App Secret"
@@ -148,6 +153,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_pinterest_board_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Pinterest Board ID"
@@ -183,6 +189,7 @@
                         android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_gemini_keys"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="أدخل مفتاح في كل سطر"
@@ -228,6 +235,7 @@
                         android:id="@+id/length_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:entries="@array/length_options"
                         android:layout_marginBottom="12dp"/>
 
                     <TextView
@@ -239,6 +247,7 @@
                         android:id="@+id/personality_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:entries="@array/personality_options"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
@@ -249,6 +258,7 @@
                         android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_max_delay"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="أقصى تأخير (بالدقائق)"

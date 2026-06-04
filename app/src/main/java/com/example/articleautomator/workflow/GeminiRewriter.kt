@@ -23,6 +23,8 @@ class GeminiRewriter @Inject constructor(
         var lastException: Exception? = null
         val keysCount = keyManager.getAllKeys().size
         
+        if (keysCount == 0) throw IllegalStateException("لا توجد مفاتيح Gemini صالحة")
+
         repeat(keysCount) {
             val key = keyManager.getCurrentKey()
             try {
@@ -46,9 +48,10 @@ class GeminiRewriter @Inject constructor(
         personalityInstruction: String
     ): Pair<String, String> {
         val lengthInstruction = when (lengthOption) {
-            "قصير" -> "Keep the article concise, around 200 words."
-            "متوسط" -> "Write a medium-length article, around 500 words."
-            "طويل" -> "Write a detailed, long-form article, around 800 words."
+            "قصير" -> "Keep the article concise, around 200-300 words."
+            "متوسط" -> "Write a medium-length article, around 500-600 words."
+            "طويل" -> "Write a detailed, long-form article, around 1000-1200 words."
+            "تلقائي" -> "Match the natural length and depth of the original article."
             else -> "Match the length of the original article."
         }
 
@@ -57,7 +60,7 @@ class GeminiRewriter @Inject constructor(
             
             1. **Title**: Create a compelling title (50-60 chars).
             2. **Meta Description**: Write a concise meta description (max 155 characters) starting with "META: ".
-            3. **Structure**: Use <h2> and <h3> tags.
+            3. **Structure**: Use <h2> and <h3> tags for better readability.
             4. **Personality**: $personalityInstruction
             5. **Length**: $lengthInstruction
             
@@ -71,7 +74,7 @@ class GeminiRewriter @Inject constructor(
 
         val request = GeminiRequest(
             contents = listOf(Content(listOf(Part(prompt)))),
-            generationConfig = GenerationConfig(temperature = 0.7, maxOutputTokens = 2000)
+            generationConfig = GenerationConfig(temperature = 0.7, maxOutputTokens = 2048)
         )
         val response = api.generateContent(apiKey, request)
         val fullResponse = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
@@ -89,7 +92,8 @@ class GeminiRewriter @Inject constructor(
     }
 
     suspend fun generateImagePrompt(title: String, excerpt: String): String {
-        val prompt = "Create a detailed image prompt for: $title. Excerpt: ${excerpt.take(100)}"
-        return rewriteWithRetry(prompt, "قصير", "Write a neutral image prompt.").first
+        val prompt = "Create a detailed, high-quality image prompt for an article titled: $title. The prompt should describe a professional illustration or photograph. Excerpt: ${excerpt.take(150)}"
+        val response = rewriteWithRetry(prompt, "قصير", "Write a neutral, descriptive image prompt.")
+        return response.first
     }
 }

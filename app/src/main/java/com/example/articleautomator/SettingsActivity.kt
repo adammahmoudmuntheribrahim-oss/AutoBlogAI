@@ -7,6 +7,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import com.example.articleautomator.model.WriterPersonality
 import com.example.articleautomator.workflow.GeminiKeyManager
@@ -37,6 +38,8 @@ class SettingsActivity : AppCompatActivity() {
         val randomSwitch = findViewById<SwitchMaterial>(R.id.random_scheduling)
         val maxDelay = findViewById<EditText>(R.id.max_delay_minutes)
 
+        val layoutGeminiKeys = findViewById<TextInputLayout>(R.id.layout_gemini_keys)
+
         // Load values
         bloggerClientId.setText(prefs.getString("blogger_client_id", ""))
         bloggerSecret.setText(prefs.getString("blogger_secret", ""))
@@ -49,6 +52,20 @@ class SettingsActivity : AppCompatActivity() {
         randomSwitch.isChecked = prefs.getBoolean("random_scheduling", false)
         maxDelay.setText(prefs.getInt("max_delay_minutes", 240).toString())
 
+        // Set spinner selections
+        val lengthOptions = resources.getStringArray(R.array.length_options)
+        val savedLength = prefs.getString("length_option", "متوسط")
+        val lengthIndex = lengthOptions.indexOf(savedLength).coerceAtLeast(0)
+        lengthSpinner.setSelection(lengthIndex)
+
+        val savedPersonalityName = prefs.getString("personality", WriterPersonality.REALIST.name)
+        try {
+            val savedPersonality = WriterPersonality.valueOf(savedPersonalityName!!)
+            personalitySpinner.setSelection(savedPersonality.ordinal)
+        } catch (e: Exception) {
+            personalitySpinner.setSelection(WriterPersonality.REALIST.ordinal)
+        }
+
         val saveButton = findViewById<Button>(R.id.save_settings)
         val progressBar = findViewById<ProgressBar>(R.id.settings_progress)
 
@@ -57,6 +74,7 @@ class SettingsActivity : AppCompatActivity() {
             
             saveButton.isEnabled = false
             progressBar.visibility = View.VISIBLE
+            layoutGeminiKeys.error = null
 
             lifecycleScope.launch {
                 val validKeys = mutableListOf<String>()
@@ -73,29 +91,37 @@ class SettingsActivity : AppCompatActivity() {
                 progressBar.visibility = View.GONE
                 saveButton.isEnabled = true
 
-                if (invalidKeys.isNotEmpty()) {
-                    Toast.makeText(this@SettingsActivity, "بعض المفاتيح غير صالحة ولن يتم حفظها", Toast.LENGTH_LONG).show()
-                }
-
+                // Update keys with valid ones only
                 geminiKeyManager.updateKeys(validKeys)
-                geminiKeys.setText(validKeys.joinToString("\n"))
+                
+                if (invalidKeys.isNotEmpty()) {
+                    val errorMsg = "المفاتيح التالية غير صالحة ولم يتم حفظها:\n${invalidKeys.joinToString("\n")}"
+                    layoutGeminiKeys.error = errorMsg
+                    geminiKeys.setText((validKeys + invalidKeys).joinToString("\n"))
+                    Toast.makeText(this@SettingsActivity, "تم حفظ المفاتيح الصحيحة فقط", Toast.LENGTH_LONG).show()
+                } else {
+                    geminiKeys.setText(validKeys.joinToString("\n"))
+                }
                 
                 prefs.edit().apply {
-                putString("blogger_client_id", bloggerClientId.text.toString())
-                putString("blogger_secret", bloggerSecret.text.toString())
-                putString("blog_id", blogId.text.toString())
-                putString("pinterest_app_id", pinterestAppId.text.toString())
-                putString("pinterest_secret", pinterestSecret.text.toString())
-                putString("board_id", pinterestBoardId.text.toString())
-                putBoolean("pinterest_enabled", pinterestEnabled.isChecked)
-                putString("length_option", lengthSpinner.selectedItem.toString())
-                putString("personality", WriterPersonality.values()[personalitySpinner.selectedItemPosition].name)
-                putBoolean("random_scheduling", randomSwitch.isChecked)
-                putInt("max_delay_minutes", maxDelay.text.toString().toIntOrNull() ?: 240)
-                apply()
-            }
-            Toast.makeText(this@SettingsActivity, "تم حفظ الإعدادات", Toast.LENGTH_SHORT).show()
-            finish()
+                    putString("blogger_client_id", bloggerClientId.text.toString())
+                    putString("blogger_secret", bloggerSecret.text.toString())
+                    putString("blog_id", blogId.text.toString())
+                    putString("pinterest_app_id", pinterestAppId.text.toString())
+                    putString("pinterest_secret", pinterestSecret.text.toString())
+                    putString("board_id", pinterestBoardId.text.toString())
+                    putBoolean("pinterest_enabled", pinterestEnabled.isChecked)
+                    putString("length_option", lengthSpinner.selectedItem.toString())
+                    putString("personality", WriterPersonality.values()[personalitySpinner.selectedItemPosition].name)
+                    putBoolean("random_scheduling", randomSwitch.isChecked)
+                    putInt("max_delay_minutes", maxDelay.text.toString().toIntOrNull() ?: 240)
+                    apply()
+                }
+
+                if (invalidKeys.isEmpty()) {
+                    Toast.makeText(this@SettingsActivity, "تم حفظ جميع الإعدادات بنجاح", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
         }
     }
