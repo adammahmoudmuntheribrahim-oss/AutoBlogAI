@@ -25,17 +25,18 @@ class ArticleWorker @AssistedInject constructor(
         val personality = WriterPersonality.valueOf(personalityName ?: WriterPersonality.REALIST.name)
         val isRandom = prefs.getBoolean("random_scheduling", false)
         val pinterestEnabled = prefs.getBoolean("pinterest_enabled", true)
+        val targetLanguage = prefs.getString("language", "English") ?: "English"
 
         if (rssUrls.isEmpty()) return Result.success()
 
-        // Execute workflow for a random RSS URL or all
+        // Execute workflow for a random RSS URL
         val targetUrl = rssUrls.random()
-        workflow.execute(targetUrl, lengthOption, personality, pinterestEnabled)
+        workflow.execute(targetUrl, lengthOption, personality, pinterestEnabled, targetLanguage)
 
-        // If random scheduling is on, schedule next run with random delay
+        // If random scheduling is on, schedule next run
         if (isRandom) {
             val maxDelay = prefs.getInt("max_delay_minutes", 240)
-            val nextDelay = Random.nextLong(15, maxDelay.toLong())
+            val nextDelay = Random.nextLong(15, maxDelay.toLong().coerceAtLeast(16))
             
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -45,11 +46,6 @@ class ArticleWorker @AssistedInject constructor(
             val nextRequest = OneTimeWorkRequestBuilder<ArticleWorker>()
                 .setInitialDelay(nextDelay, TimeUnit.MINUTES)
                 .setConstraints(constraints)
-                .setBackoffCriteria(
-                    BackoffPolicy.EXPONENTIAL,
-                    WorkRequest.MIN_BACKOFF_MILLIS,
-                    TimeUnit.MILLISECONDS
-                )
                 .addTag("ARTICLE_WORKER")
                 .build()
             
@@ -61,9 +57,5 @@ class ArticleWorker @AssistedInject constructor(
         }
 
         return Result.success()
-    }
-
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return super.getForegroundInfo()
     }
 }

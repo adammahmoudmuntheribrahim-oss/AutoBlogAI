@@ -34,7 +34,13 @@ class ArticleWorkflow @Inject constructor(
         return block() // Last attempt
     }
 
-    suspend fun execute(rssUrl: String, lengthOption: String, personality: WriterPersonality, pinterestEnabled: Boolean = true) {
+    suspend fun execute(
+        rssUrl: String, 
+        lengthOption: String, 
+        personality: WriterPersonality, 
+        pinterestEnabled: Boolean = true,
+        targetLanguage: String = "English"
+    ) {
         withContext(Dispatchers.IO) {
             try {
                 logRepository.addLog("بدء سير العمل للرابط: $rssUrl", "INFO")
@@ -53,10 +59,11 @@ class ArticleWorkflow @Inject constructor(
                     geminiRewriter.rewriteWithRetry(
                         originalText = item.description,
                         lengthOption = lengthOption,
-                        personalityInstruction = personality.instruction
+                        personalityInstruction = personality.instruction,
+                        targetLanguage = targetLanguage
                     )
                 }
-                logRepository.addLog("تمت إعادة كتابة المقال (الشخصية: ${personality.displayName})", "SUCCESS")
+                logRepository.addLog("تمت إعادة كتابة المقال (اللغة: $targetLanguage، الشخصية: ${personality.displayName})", "SUCCESS")
 
                 val imageUrl = retry {
                     val imagePrompt = geminiRewriter.generateImagePrompt(item.title, articleHtml.take(500))
@@ -81,8 +88,6 @@ class ArticleWorkflow @Inject constructor(
                     } catch (e: Exception) {
                         logRepository.addLog("فشل النشر على Pinterest (اختياري): ${e.message}", "INFO")
                     }
-                } else {
-                    logRepository.addLog("تم تخطي النشر على Pinterest (معطل من الإعدادات)", "INFO")
                 }
 
                 publishedDao.insert(PublishedArticle(guid = item.guid, contentHash = item.contentHash))

@@ -10,4 +10,16 @@
         <item>المتفائل</item>
         <item>الواقعي</item>
     </string-array>
+    <string-array name="language_options">
+        <item>العربية</item>
+        <item>الإنجليزية</item>
+        <item>الفرنسية</item>
+        <item>الإسبانية</item>
+        <item>الألمانية</item>
+    </string-array>
+    <string-array name="image_source_options">
+        <item>DALL-E 3 (OpenAI)</item>
+        <item>Gemini Image (مجاني)</item>
+        <item>Pinterest (بحث)</item>
+    </string-array>
 </resources>

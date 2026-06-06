@@ -43,12 +43,13 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         setupRecyclerViews()
         setupButtons()
-        observeLogs()
+        observeData()
     }
 
     override fun onResume() {
         super.onResume()
         updatePinterestButtonVisibility()
+        viewModel.refreshStats()
     }
 
     private fun updatePinterestButtonVisibility() {
@@ -66,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         val rssRecycler = findViewById<RecyclerView>(R.id.rss_recycler)
         val savedUrls = getSharedPreferences("settings", Context.MODE_PRIVATE)
             .getStringSet("rss_urls", emptySet())?.toList() ?: emptyList()
+        rssUrls.clear()
         rssUrls.addAll(savedUrls)
         rssAdapter = RssAdapter(rssUrls) { position ->
             rssUrls.removeAt(position)
@@ -114,22 +116,22 @@ class MainActivity : AppCompatActivity() {
                 val provider = result.data?.getStringExtra("provider") ?: "google"
                 
                 lifecycleScope.launch {
-	                    try {
-	                        if (provider == "google") {
-	                            bloggerPublisher.authenticateWithCode(code)
-	                            logRepository.addLog("تم ربط Blogger بنجاح", "SUCCESS")
-	                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Blogger بنجاح", Snackbar.LENGTH_LONG).show()
-	                        } else {
-	                            pinterestPublisher.authenticateWithCode(code)
-	                            logRepository.addLog("تم ربط Pinterest بنجاح", "SUCCESS")
-	                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Pinterest بنجاح", Snackbar.LENGTH_LONG).show()
-	                        }
-	                    } catch (e: Exception) {
-	                        logRepository.addLog("فشل الربط: ${e.message}", "ERROR")
-	                        Snackbar.make(findViewById(android.R.id.content), "فشل الربط: ${e.message}", Snackbar.LENGTH_INDEFINITE)
-	                            .setAction("إغلاق") {}
-	                            .show()
-	                    }
+                    try {
+                        if (provider == "google") {
+                            bloggerPublisher.authenticateWithCode(code)
+                            logRepository.addLog("تم ربط Blogger بنجاح", "SUCCESS")
+                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Blogger بنجاح", Snackbar.LENGTH_LONG).show()
+                        } else {
+                            pinterestPublisher.authenticateWithCode(code)
+                            logRepository.addLog("تم ربط Pinterest بنجاح", "SUCCESS")
+                            Snackbar.make(findViewById(android.R.id.content), "تم ربط Pinterest بنجاح", Snackbar.LENGTH_LONG).show()
+                        }
+                    } catch (e: Exception) {
+                        logRepository.addLog("فشل الربط: ${e.message}", "ERROR")
+                        Snackbar.make(findViewById(android.R.id.content), "فشل الربط: ${e.message}", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("إغلاق") {}
+                            .show()
+                    }
                 }
             }
         }
@@ -169,10 +171,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeLogs() {
+    private fun observeData() {
         viewModel.logs.observe(this) { logs ->
             logAdapter.updateData(logs)
             findViewById<RecyclerView>(R.id.log_recycler).scrollToPosition(logs.size - 1)
+        }
+
+        viewModel.stats.observe(this) { stats ->
+            findViewById<TextView>(R.id.today_published_count).text = stats.todayCount.toString()
+            findViewById<TextView>(R.id.total_published_count).text = stats.totalCount.toString()
         }
     }
 

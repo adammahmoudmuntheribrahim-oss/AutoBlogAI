@@ -33,9 +33,12 @@ class SettingsActivity : AppCompatActivity() {
         val pinterestSecret = findViewById<EditText>(R.id.pinterest_secret)
         val pinterestBoardId = findViewById<EditText>(R.id.pinterest_board_id)
         val pinterestEnabled = findViewById<SwitchMaterial>(R.id.pinterest_enabled)
+        val previewEnabled = findViewById<SwitchMaterial>(R.id.preview_enabled)
         val geminiKeys = findViewById<EditText>(R.id.gemini_keys)
         val lengthSpinner = findViewById<Spinner>(R.id.length_spinner)
         val personalitySpinner = findViewById<Spinner>(R.id.personality_spinner)
+        val languageSpinner = findViewById<Spinner>(R.id.language_spinner)
+        val imageSourceSpinner = findViewById<Spinner>(R.id.image_source_spinner)
         val randomSwitch = findViewById<SwitchMaterial>(R.id.random_scheduling)
         val maxDelay = findViewById<EditText>(R.id.max_delay_minutes)
 
@@ -57,6 +60,7 @@ class SettingsActivity : AppCompatActivity() {
         pinterestSecret.setText(prefs.getString("pinterest_secret", ""))
         pinterestBoardId.setText(prefs.getString("board_id", ""))
         pinterestEnabled.isChecked = prefs.getBoolean("pinterest_enabled", true)
+        previewEnabled.isChecked = prefs.getBoolean("preview_enabled", false)
         geminiKeys.setText(geminiKeyManager.getAllKeys().joinToString("\n"))
         randomSwitch.isChecked = prefs.getBoolean("random_scheduling", false)
         maxDelay.setText(prefs.getInt("max_delay_minutes", 240).toString())
@@ -64,8 +68,15 @@ class SettingsActivity : AppCompatActivity() {
         // Set spinner selections
         val lengthOptions = resources.getStringArray(R.array.length_options)
         val savedLength = prefs.getString("length_option", "متوسط")
-        val lengthIndex = lengthOptions.indexOf(savedLength).coerceAtLeast(0)
-        lengthSpinner.setSelection(lengthIndex)
+        lengthSpinner.setSelection(lengthOptions.indexOf(savedLength).coerceAtLeast(0))
+
+        val languageOptions = resources.getStringArray(R.array.language_options)
+        val savedLang = prefs.getString("language", "الإنجليزية")
+        languageSpinner.setSelection(languageOptions.indexOf(savedLang).coerceAtLeast(0))
+
+        val imageSourceOptions = resources.getStringArray(R.array.image_source_options)
+        val savedImgSrc = prefs.getString("image_source", "Gemini Image (مجاني)")
+        imageSourceSpinner.setSelection(imageSourceOptions.indexOf(savedImgSrc).coerceAtLeast(0))
 
         val savedPersonalityName = prefs.getString("personality", WriterPersonality.REALIST.name)
         try {
@@ -82,133 +93,65 @@ class SettingsActivity : AppCompatActivity() {
             saveButton.isEnabled = false
             progressBar.visibility = View.VISIBLE
             
-            // Clear previous errors and helpers
             val layouts = listOf(
                 layoutBloggerClientId, layoutBloggerSecret, layoutBlogId,
                 layoutPinterestAppId, layoutPinterestSecret, layoutPinterestBoardId,
                 layoutGeminiKeys, layoutMaxDelay
             )
-            layouts.forEach { 
-                it.error = null
-                it.helperText = null
-            }
+            layouts.forEach { it.error = null; it.helperText = null }
 
             lifecycleScope.launch {
                 val editor = prefs.edit()
                 var hasAnyError = false
 
-                // 1. Validate Blogger Settings
-                if (bloggerClientId.text.isBlank()) {
-                    layoutBloggerClientId.error = "هذا الحقل مطلوب"
-                    hasAnyError = true
-                } else {
-                    editor.putString("blogger_client_id", bloggerClientId.text.toString())
-                    layoutBloggerClientId.helperText = "تم الحفظ بنجاح"
-                }
+                // Validate Blogger
+                if (bloggerClientId.text.isBlank()) { layoutBloggerClientId.error = "مطلوب"; hasAnyError = true }
+                else { editor.putString("blogger_client_id", bloggerClientId.text.toString()); layoutBloggerClientId.helperText = "تم" }
 
-                if (bloggerSecret.text.isBlank()) {
-                    layoutBloggerSecret.error = "هذا الحقل مطلوب"
-                    hasAnyError = true
-                } else {
-                    editor.putString("blogger_secret", bloggerSecret.text.toString())
-                    layoutBloggerSecret.helperText = "تم الحفظ بنجاح"
-                }
+                if (bloggerSecret.text.isBlank()) { layoutBloggerSecret.error = "مطلوب"; hasAnyError = true }
+                else { editor.putString("blogger_secret", bloggerSecret.text.toString()); layoutBloggerSecret.helperText = "تم" }
 
-                if (blogId.text.isBlank()) {
-                    layoutBlogId.error = "هذا الحقل مطلوب"
-                    hasAnyError = true
-                } else {
-                    editor.putString("blog_id", blogId.text.toString())
-                    layoutBlogId.helperText = "تم الحفظ بنجاح"
-                }
+                if (blogId.text.isBlank()) { layoutBlogId.error = "مطلوب"; hasAnyError = true }
+                else { editor.putString("blog_id", blogId.text.toString()); layoutBlogId.helperText = "تم" }
 
-                // 2. Validate Pinterest Settings (Only if enabled)
+                // Validate Pinterest
                 if (pinterestEnabled.isChecked) {
-                    if (pinterestAppId.text.isBlank()) {
-                        layoutPinterestAppId.error = "هذا الحقل مطلوب عند تفعيل Pinterest"
-                        hasAnyError = true
-                    } else {
-                        editor.putString("pinterest_app_id", pinterestAppId.text.toString())
-                        layoutPinterestAppId.helperText = "تم الحفظ بنجاح"
-                    }
-
-                    if (pinterestSecret.text.isBlank()) {
-                        layoutPinterestSecret.error = "هذا الحقل مطلوب عند تفعيل Pinterest"
-                        hasAnyError = true
-                    } else {
-                        editor.putString("pinterest_secret", pinterestSecret.text.toString())
-                        layoutPinterestSecret.helperText = "تم الحفظ بنجاح"
-                    }
-
-                    if (pinterestBoardId.text.isBlank()) {
-                        layoutPinterestBoardId.error = "هذا الحقل مطلوب عند تفعيل Pinterest"
-                        hasAnyError = true
-                    } else {
-                        editor.putString("board_id", pinterestBoardId.text.toString())
-                        layoutPinterestBoardId.helperText = "تم الحفظ بنجاح"
-                    }
-                } else {
-                    // Still save values if they exist, but don't require them
-                    editor.putString("pinterest_app_id", pinterestAppId.text.toString())
-                    editor.putString("pinterest_secret", pinterestSecret.text.toString())
-                    editor.putString("board_id", pinterestBoardId.text.toString())
+                    if (pinterestAppId.text.isBlank()) { layoutPinterestAppId.error = "مطلوب"; hasAnyError = true }
+                    else { editor.putString("pinterest_app_id", pinterestAppId.text.toString()); layoutPinterestAppId.helperText = "تم" }
                 }
                 editor.putBoolean("pinterest_enabled", pinterestEnabled.isChecked)
+                editor.putBoolean("preview_enabled", previewEnabled.isChecked)
 
-                // 3. Validate Gemini Keys (Independent validation for each key)
+                // Validate Gemini
                 val keys = geminiKeys.text.toString().split("\n").filter { it.isNotBlank() }
-                if (keys.isEmpty()) {
-                    layoutGeminiKeys.error = "يجب إضافة مفتاح Gemini واحد على الأقل"
-                    hasAnyError = true
-                } else {
-                    val validKeys = mutableListOf<String>()
-                    val invalidKeys = mutableListOf<String>()
-                    
-                    for (key in keys) {
-                        if (geminiKeyManager.validateKey(key)) {
-                            validKeys.add(key)
-                        } else {
-                            invalidKeys.add(key)
-                        }
-                    }
-                    
+                if (keys.isEmpty()) { layoutGeminiKeys.error = "مطلوب مفتاح واحد على الأقل"; hasAnyError = true }
+                else {
+                    val validKeys = keys.filter { geminiKeyManager.validateKey(it) }
                     geminiKeyManager.updateKeys(validKeys)
-                    
-                    if (invalidKeys.isNotEmpty()) {
-                        layoutGeminiKeys.error = "تم رفض المفاتيح الخاطئة:\n${invalidKeys.joinToString("\n")}"
-                        geminiKeys.setText((validKeys + invalidKeys).joinToString("\n"))
-                        hasAnyError = true
-                    } else {
-                        layoutGeminiKeys.helperText = "تم التحقق وحفظ جميع المفاتيح بنجاح"
-                        geminiKeys.setText(validKeys.joinToString("\n"))
-                    }
+                    if (validKeys.size < keys.size) { layoutGeminiKeys.error = "بعض المفاتيح خاطئة"; hasAnyError = true }
+                    else layoutGeminiKeys.helperText = "تم التحقق"
                 }
 
-                // 4. Save Content Options
+                // Save Spinners
                 editor.putString("length_option", lengthSpinner.selectedItem.toString())
+                editor.putString("language", languageSpinner.selectedItem.toString())
+                editor.putString("image_source", imageSourceSpinner.selectedItem.toString())
                 editor.putString("personality", WriterPersonality.values()[personalitySpinner.selectedItemPosition].name)
+                
                 editor.putBoolean("random_scheduling", randomSwitch.isChecked)
-                
                 val delayVal = maxDelay.text.toString().toIntOrNull()
-                if (delayVal == null || delayVal <= 0) {
-                    layoutMaxDelay.error = "أدخل قيمة صحيحة أكبر من صفر"
-                    hasAnyError = true
-                } else {
-                    editor.putInt("max_delay_minutes", delayVal)
-                    layoutMaxDelay.helperText = "تم الحفظ بنجاح"
-                }
+                if (delayVal == null || delayVal <= 0) { layoutMaxDelay.error = "خطأ"; hasAnyError = true }
+                else { editor.putInt("max_delay_minutes", delayVal); layoutMaxDelay.helperText = "تم" }
 
-                // Final Save
                 editor.apply()
-                
                 progressBar.visibility = View.GONE
                 saveButton.isEnabled = true
 
-                if (hasAnyError) {
-                    Toast.makeText(this@SettingsActivity, "تم حفظ الحقول الصحيحة، يرجى مراجعة الحقول الخاطئة", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this@SettingsActivity, "تم حفظ جميع الإعدادات بنجاح", Toast.LENGTH_SHORT).show()
+                if (!hasAnyError) {
+                    Toast.makeText(this@SettingsActivity, "تم الحفظ", Toast.LENGTH_SHORT).show()
                     finish()
+                } else {
+                    Toast.makeText(this@SettingsActivity, "يرجى مراجعة الأخطاء", Toast.LENGTH_LONG).show()
                 }
             }
         }
