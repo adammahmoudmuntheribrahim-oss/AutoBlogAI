@@ -48,14 +48,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updatePinterestButtonVisibility()
+        updateButtonVisibilities()
         viewModel.refreshStats()
     }
 
-    private fun updatePinterestButtonVisibility() {
-        val pinterestEnabled = getSharedPreferences("settings", Context.MODE_PRIVATE)
-            .getBoolean("pinterest_enabled", true)
+    private fun updateButtonVisibilities() {
+        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        
+        val bloggerEnabled = prefs.getBoolean("blogger_enabled", true)
+        findViewById<Button>(R.id.auth_blogger)?.visibility = if (bloggerEnabled) android.view.View.VISIBLE else android.view.View.GONE
+
+        val pinterestEnabled = prefs.getBoolean("pinterest_enabled", true)
         findViewById<Button>(R.id.auth_pinterest)?.visibility = if (pinterestEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        
+        // WordPress uses Application Password (no OAuth button needed in MainActivity)
     }
 
     private fun setupRecyclerViews() {

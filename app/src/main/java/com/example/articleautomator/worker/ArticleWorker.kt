@@ -31,7 +31,7 @@ class ArticleWorker @AssistedInject constructor(
 
         // Execute workflow for a random RSS URL
         val targetUrl = rssUrls.random()
-        workflow.execute(targetUrl, lengthOption, personality, pinterestEnabled, targetLanguage)
+        workflow.execute(targetUrl, lengthOption, personality, targetLanguage)
 
         // If random scheduling is on, schedule next run
         if (isRandom) {

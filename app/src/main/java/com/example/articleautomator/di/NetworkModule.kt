@@ -108,4 +108,13 @@ object NetworkModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(PinterestTokenApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideWordPressApi(client: OkHttpClient): WordPressApiService = Retrofit.Builder()
+        .baseUrl("https://placeholder.com/") // سيتم استخدام @Url أو تغيير الرابط في الطلب إذا لزم الأمر، لكن هنا سنعتمد على أن المستخدم يدخل الرابط الكامل
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(WordPressApiService::class.java)
 }

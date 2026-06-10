@@ -1,6 +1,8 @@
 package com.example.articleautomator.workflow
 
 import android.content.Context
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.example.articleautomator.api.Content
 import com.example.articleautomator.api.GeminiApiService
 import com.example.articleautomator.api.GeminiRequest
@@ -15,7 +17,18 @@ class GeminiKeyManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val api: Lazy<GeminiApiService>
 ) {
-    private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    private val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+    private val prefs = EncryptedSharedPreferences.create(
+        context,
+        "secure_gemini_keys",
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
     private var keys: List<String> = prefs.getStringSet("gemini_keys", emptySet())?.toList() ?: emptyList()
     private var currentIndex = 0
 

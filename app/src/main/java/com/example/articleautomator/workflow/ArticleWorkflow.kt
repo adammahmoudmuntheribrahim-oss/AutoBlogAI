@@ -1,10 +1,12 @@
 package com.example.articleautomator.workflow
 
+import android.content.Context
 import com.example.articleautomator.data.PublishedArticleDao
 import com.example.articleautomator.data.LogRepository
 import com.example.articleautomator.data.PublishedArticle
 import com.example.articleautomator.model.BlogPost
 import com.example.articleautomator.model.WriterPersonality
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,14 +14,18 @@ import javax.inject.Singleton
 
 @Singleton
 class ArticleWorkflow @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val rssFetcher: RssFetcher,
     private val geminiRewriter: GeminiRewriter,
     private val imageGenerator: ImageGenerator,
     private val bloggerPublisher: BloggerPublisher,
+    private val wordpressPublisher: WordPressPublisher,
     private val pinterestPublisher: PinterestPublisher,
     private val publishedDao: PublishedArticleDao,
     private val logRepository: LogRepository
 ) {
+    private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
     suspend fun <T> retry(times: Int = 3, initialDelay: Long = 1000, block: suspend () -> T): T {
         var currentDelay = initialDelay
         repeat(times - 1) {
@@ -38,11 +44,19 @@ class ArticleWorkflow @Inject constructor(
         rssUrl: String, 
         lengthOption: String, 
         personality: WriterPersonality, 
-        pinterestEnabled: Boolean = true,
         targetLanguage: String = "English"
     ) {
         withContext(Dispatchers.IO) {
             try {
+                val bloggerEnabled = prefs.getBoolean("blogger_enabled", true)
+                val wordpressEnabled = prefs.getBoolean("wordpress_enabled", false)
+                val pinterestEnabled = prefs.getBoolean("pinterest_enabled", true)
+
+                if (!bloggerEnabled && !wordpressEnabled) {
+                    logRepository.addLog("جميع منصات النشر (Blogger/WordPress) معطلة. تم إيقاف سير العمل.", "INFO")
+                    return@withContext
+                }
+
                 logRepository.addLog("بدء سير العمل للرابط: $rssUrl", "INFO")
                 
                 val item = retry {
@@ -71,19 +85,40 @@ class ArticleWorkflow @Inject constructor(
                 }
                 logRepository.addLog("تم إنشاء صورة معبرة", "SUCCESS")
 
-                val blogUrl = retry {
-                    val blogPost = BlogPost(
-                        title = item.title,
-                        content = articleHtml,
-                        metaDescription = metaDescription
-                    )
-                    bloggerPublisher.publish(blogPost)
-                }
-                logRepository.addLog("تم النشر على Blogger: $blogUrl", "SUCCESS")
+                val blogPost = BlogPost(
+                    title = item.title,
+                    content = articleHtml,
+                    metaDescription = metaDescription
+                )
 
-                if (pinterestEnabled) {
+                var primaryUrl: String? = null
+
+                // Publish to Blogger
+                if (bloggerEnabled) {
                     try {
-                        retry { pinterestPublisher.createPin(blogUrl, imageUrl, item.title) }
+                        val url = retry { bloggerPublisher.publish(blogPost) }
+                        primaryUrl = url
+                        logRepository.addLog("تم النشر على Blogger: $url", "SUCCESS")
+                    } catch (e: Exception) {
+                        logRepository.addLog("فشل النشر على Blogger: ${e.message}", "ERROR")
+                    }
+                }
+
+                // Publish to WordPress
+                if (wordpressEnabled) {
+                    try {
+                        val url = retry { wordpressPublisher.publish(blogPost) }
+                        if (primaryUrl == null) primaryUrl = url
+                        logRepository.addLog("تم النشر على WordPress: $url", "SUCCESS")
+                    } catch (e: Exception) {
+                        logRepository.addLog("فشل النشر على WordPress: ${e.message}", "ERROR")
+                    }
+                }
+
+                // Publish to Pinterest
+                if (pinterestEnabled && primaryUrl != null) {
+                    try {
+                        retry { pinterestPublisher.createPin(primaryUrl, imageUrl, item.title) }
                         logRepository.addLog("تم إنشاء Pin في Pinterest", "SUCCESS")
                     } catch (e: Exception) {
                         logRepository.addLog("فشل النشر على Pinterest (اختياري): ${e.message}", "INFO")
